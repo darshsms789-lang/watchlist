@@ -1,1 +1,1003 @@
-# watchlist
+# watchlist[phiprep-waitlist.html](https://github.com/user-attachments/files/26166459/phiprep-waitlist.html)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PhiPrep — Early Access</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #080d09;
+      color: #dceadc;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.022;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card {
+      background: #0d1510;
+      border: 1px solid rgba(74, 160, 90, 0.22);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 260px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #3fa663, transparent);
+    }
+
+    .screen {
+      display: none;
+      padding: 40px 36px 36px;
+      animation: fadeUp 0.35s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* brand tag */
+    .brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #4ecc7a;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ecc7a;
+      box-shadow: 0 0 8px #4ecc7a;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #f0f7f1;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 0.88rem;
+      color: #7a9e82;
+      line-height: 1.75;
+      margin-bottom: 28px;
+    }
+
+    /* bullet list on welcome */
+    .bullet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .bullet-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.87rem;
+      color: #dceadc;
+      line-height: 1.5;
+    }
+
+    .bullet-item::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #4ecc7a;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    /* step progress dots */
+    .step-bar {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 30px;
+    }
+
+    .step-dot {
+      height: 3px;
+      flex: 1;
+      border-radius: 100px;
+      background: rgba(74, 160, 90, 0.12);
+      transition: background 0.3s;
+    }
+
+    .step-dot.done { background: #4ecc7a; }
+    .step-dot.active { background: rgba(78, 204, 122, 0.45); }
+
+    /* question labels */
+    .q-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3d5c42;
+      margin-bottom: 8px;
+    }
+
+    .q-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f0f7f1;
+      line-height: 1.35;
+      margin-bottom: 20px;
+    }
+
+    /* email input */
+    .email-input {
+      width: 100%;
+      background: #111c13;
+      border: 1px solid rgba(74, 160, 90, 0.2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: #f0f7f1;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 6px;
+    }
+
+    .email-input::placeholder { color: #3d5c42; }
+    .email-input:focus { border-color: #3fa663; }
+
+    .input-error {
+      font-size: 0.74rem;
+      color: #e07777;
+      min-height: 18px;
+      margin-bottom: 14px;
+    }
+
+    /* multiple choice */
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 24px;
+    }
+
+    .choice-btn {
+      width: 100%;
+      padding: 13px 16px;
+      background: #111c13;
+      border: 1px solid rgba(74, 160, 90, 0.16);
+      border-radius: 10px;
+      color: #dceadc;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.87rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .choice-btn::before {
+      content: '';
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(74, 160, 90, 0.28);
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .choice-btn:hover {
+      border-color: rgba(78, 204, 122, 0.32);
+      background: rgba(45, 122, 71, 0.07);
+    }
+
+    .choice-btn.selected {
+      border-color: #3fa663;
+      background: rgba(45, 122, 71, 0.14);
+      color: #f0f7f1;
+    }
+
+    .choice-btn.selected::before {
+      background: #4ecc7a;
+      border-color: #4ecc7a;
+      box-shadow: 0 0 8px rgba(78, 204, 122, 0.4);
+    }
+
+    /* primary button */
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: #2d7a47;
+      border: none;
+      border-radius: 10px;
+      color: #f0f7f1;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #3fa663;
+      box-shadow: 0 8px 28px rgba(63, 166, 99, 0.32);
+    }
+
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-skip {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: #3d5c42;
+      font-size: 0.78rem;
+      cursor: pointer;
+      margin-top: 8px;
+      font-family: 'DM Sans', sans-serif;
+      transition: color 0.2s;
+    }
+
+    .btn-skip:hover { color: #7a9e82; }
+
+    /* divider */
+    .divider {
+      height: 1px;
+      background: rgba(74, 160, 90, 0.1);
+      margin: 20px 0;
+    }
+
+    /* ---- SUCCESS DASHBOARD ---- */
+
+    /* big position card - this is the robinhood part */
+    .position-card {
+      background: #060c07;
+      border: 1px solid rgba(74, 160, 90, 0.2);
+      border-radius: 14px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .position-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 180px; height: 1px;
+      background: linear-gradient(90deg, transparent, #3fa663, transparent);
+    }
+
+    /* subtle glow behind number */
+    .position-card::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(45,122,71,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .pos-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #3d5c42;
+      margin-bottom: 14px;
+    }
+
+    .pos-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 4rem;
+      font-weight: 800;
+      color: #f0f7f1;
+      line-height: 1;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+      transition: color 0.4s;
+    }
+
+    .pos-number.jumped {
+      color: #4ecc7a;
+    }
+
+    .pos-total {
+      font-size: 0.82rem;
+      color: #7a9e82;
+      position: relative;
+      z-index: 1;
+    }
+
+    .moved-up-badge {
+      display: none;
+      margin: 12px auto 0;
+      background: rgba(45, 122, 71, 0.18);
+      border: 1px solid rgba(78, 204, 122, 0.22);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      color: #4ecc7a;
+      width: fit-content;
+      position: relative;
+      z-index: 1;
+    }
+
+    .moved-up-badge.visible {
+      display: block;
+    }
+
+    /* referral progress row */
+    .ref-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .ref-row-label {
+      font-size: 0.82rem;
+      color: #7a9e82;
+    }
+
+    .ref-row-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #4ecc7a;
+    }
+
+    .progress-track {
+      background: rgba(74, 160, 90, 0.08);
+      border-radius: 100px;
+      height: 5px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, #2d7a47, #4ecc7a);
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .progress-next {
+      font-size: 0.7rem;
+      color: #3d5c42;
+      text-align: right;
+    }
+
+    /* milestones */
+    .milestones {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 20px;
+    }
+
+    .ms-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      background: #111c13;
+      border: 1px solid rgba(74, 160, 90, 0.13);
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+
+    .ms-row.done {
+      border-color: rgba(78, 204, 122, 0.32);
+      background: rgba(45, 122, 71, 0.1);
+    }
+
+    .ms-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(74, 160, 90, 0.18);
+      background: rgba(45, 122, 71, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .ms-row.done .ms-icon {
+      border-color: rgba(78, 204, 122, 0.38);
+      background: rgba(45, 122, 71, 0.22);
+    }
+
+    .ms-text { flex: 1; }
+
+    .ms-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.77rem;
+      font-weight: 700;
+      color: #dceadc;
+      margin-bottom: 2px;
+    }
+
+    .ms-row.done .ms-title { color: #4ecc7a; }
+
+    .ms-desc {
+      font-size: 0.72rem;
+      color: #3d5c42;
+    }
+
+    .ms-count {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #3d5c42;
+      white-space: nowrap;
+    }
+
+    .ms-row.done .ms-count { color: #4ecc7a; }
+
+    /* referral link box */
+    .ref-link-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ref-link-display {
+      flex: 1;
+      background: #111c13;
+      border: 1px solid rgba(74, 160, 90, 0.18);
+      border-radius: 9px;
+      padding: 11px 14px;
+      color: #4ecc7a;
+      font-family: 'Courier New', monospace;
+      font-size: 0.76rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-btn {
+      padding: 11px 18px;
+      background: rgba(45, 122, 71, 0.18);
+      border: 1px solid rgba(78, 204, 122, 0.22);
+      border-radius: 9px;
+      color: #4ecc7a;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: rgba(45, 122, 71, 0.3);
+    }
+
+    .copy-btn.done {
+      background: #2d7a47;
+      color: #f0f7f1;
+    }
+
+    /* share row */
+    .share-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .share-btn {
+      flex: 1;
+      padding: 10px 6px;
+      background: #111c13;
+      border: 1px solid rgba(74, 160, 90, 0.14);
+      border-radius: 9px;
+      color: #7a9e82;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .share-btn:hover {
+      border-color: rgba(78, 204, 122, 0.28);
+      color: #dceadc;
+      background: rgba(45, 122, 71, 0.07);
+    }
+
+    /* toast */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #2d7a47;
+      color: #f0f7f1;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.77rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 520px) {
+      .screen { padding: 28px 20px 24px; }
+      h1 { font-size: 1.4rem; }
+      .pos-number { font-size: 3.2rem; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ======= WELCOME ======= -->
+  <div class="screen active" id="s-welcome">
+    <div class="brand">PhiPrep · Early Access</div>
+    <h1>Stop getting answers.<br/>Start thinking.</h1>
+    <p class="subtitle">Most AI tools dump solutions. PhiPrep teaches you <strong style="color:#dceadc;">how to think</strong> through JEE problems — step by step.</p>
+    <div class="bullet-list">
+      <div class="bullet-item">Brain Mode → learn concepts step-by-step</div>
+      <div class="bullet-item">SOS Mode → instant full solution when stuck</div>
+      <div class="bullet-item">AI mistake detection on your solving steps</div>
+      <div class="bullet-item">Math keyboard + scientific calculator built-in</div>
+    </div>
+    <button class="btn-primary" onclick="go('s-email')">Join the Waitlist →</button>
+    <p style="font-size:0.71rem; color:#3d5c42; text-align:center; margin-top:14px;">Free. No spam. Unsubscribe anytime.</p>
+  </div>
+
+  <!-- ======= EMAIL ======= -->
+  <div class="screen" id="s-email">
+    <div class="brand">PhiPrep · Early Access</div>
+    <div class="step-bar">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="q-label">Step 1 of 3</div>
+    <div class="q-title">What's your email address?</div>
+    <input class="email-input" type="email" id="emailInput" placeholder="you@example.com" oninput="clearErr()"/>
+    <div class="input-error" id="emailErr"></div>
+    <button class="btn-primary" onclick="doEmail()">Continue →</button>
+  </div>
+
+  <!-- ======= EXAM ======= -->
+  <div class="screen" id="s-exam">
+    <div class="brand">PhiPrep · Early Access</div>
+    <div class="step-bar">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="q-label">Step 2 of 3</div>
+    <div class="q-title">What exam are you preparing for?</div>
+    <div class="choices" id="examList">
+      <button class="choice-btn" onclick="pick('exam', this)">JEE Main</button>
+      <button class="choice-btn" onclick="pick('exam', this)">JEE Advanced</button>
+      <button class="choice-btn" onclick="pick('exam', this)">NEET</button>
+      <button class="choice-btn" onclick="pick('exam', this)">Class 11/12 Boards</button>
+      <button class="choice-btn" onclick="pick('exam', this)">Other</button>
+    </div>
+    <button class="btn-primary" onclick="doExam()">Continue →</button>
+  </div>
+
+  <!-- ======= FINAL QUESTIONS ======= -->
+  <div class="screen" id="s-final">
+    <div class="brand">PhiPrep · Early Access</div>
+    <div class="step-bar">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+    </div>
+    <div class="q-label">Step 3 of 3</div>
+    <div class="q-title">Do you use AI like ChatGPT for studying?</div>
+    <div class="choices" id="aiList" style="margin-bottom:22px;">
+      <button class="choice-btn" onclick="pick('ai', this)">Yes, regularly</button>
+      <button class="choice-btn" onclick="pick('ai', this)">Sometimes</button>
+      <button class="choice-btn" onclick="pick('ai', this)">Rarely</button>
+      <button class="choice-btn" onclick="pick('ai', this)">Never</button>
+    </div>
+    <div class="q-title" style="font-size:0.95rem; margin-bottom:14px;">Biggest problem with AI study tools?</div>
+    <div class="choices" id="problemList">
+      <button class="choice-btn" onclick="pick('prob', this)">Wrong steps</button>
+      <button class="choice-btn" onclick="pick('prob', this)">Just dumps answers</button>
+      <button class="choice-btn" onclick="pick('prob', this)">Bad explanations</button>
+      <button class="choice-btn" onclick="pick('prob', this)">Can't detect my mistake</button>
+      <button class="choice-btn" onclick="pick('prob', this)">Not useful for JEE</button>
+    </div>
+    <button class="btn-primary" style="margin-top:22px;" onclick="doFinal()">Join the Waitlist →</button>
+    <button class="btn-skip" onclick="doFinal()">Skip and join</button>
+  </div>
+
+  <!-- ======= SUCCESS DASHBOARD ======= -->
+  <div class="screen" id="s-success">
+
+    <div class="brand">PhiPrep · You're in 🎉</div>
+
+    <!-- THE ROBINHOOD PART — big position number -->
+    <div class="position-card">
+      <div class="pos-label">Your position in line</div>
+      <div class="pos-number" id="posNum">#—</div>
+      <div class="pos-total">out of <span id="totalNum">—</span> people waiting</div>
+      <div class="moved-up-badge" id="movedBadge">↑ moved up <span id="movedNum">0</span> spots from referrals</div>
+    </div>
+
+    <!-- referral count progress -->
+    <div class="ref-row">
+      <span class="ref-row-label">Your referrals</span>
+      <span class="ref-row-num"><span id="refNum">0</span> / 10</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="refBar" style="width:0%"></div>
+    </div>
+    <div class="progress-next" id="progressHint">Refer 3 friends to skip 10 spots →</div>
+
+    <div class="divider"></div>
+
+    <!-- milestones -->
+    <div style="font-family:'Syne',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#3d5c42; margin-bottom:10px;">Unlock rewards</div>
+
+    <div class="milestones">
+      <div class="ms-row" id="m1">
+        <div class="ms-icon">⚡</div>
+        <div class="ms-text">
+          <div class="ms-title">Skip 10 spots</div>
+          <div class="ms-desc">Jump ahead of 10 people instantly</div>
+        </div>
+        <div class="ms-count" id="mc1">0 / 3</div>
+      </div>
+      <div class="ms-row" id="m2">
+        <div class="ms-icon">🔑</div>
+        <div class="ms-text">
+          <div class="ms-title">Beta invite</div>
+          <div class="ms-desc">Early access before public launch</div>
+        </div>
+        <div class="ms-count" id="mc2">0 / 5</div>
+      </div>
+      <div class="ms-row" id="m3">
+        <div class="ms-icon">👑</div>
+        <div class="ms-text">
+          <div class="ms-title">3 months free Pro</div>
+          <div class="ms-desc">Full premium, no payment needed</div>
+        </div>
+        <div class="ms-count" id="mc3">0 / 10</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- referral link -->
+    <div style="font-family:'Syne',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#3d5c42; margin-bottom:8px;">Your referral link</div>
+    <div class="ref-link-row">
+      <div class="ref-link-display" id="refLinkText">phiprep.app/ref/—</div>
+      <button class="copy-btn" id="copyBtn" onclick="doCopy()">Copy</button>
+    </div>
+
+    <!-- share buttons -->
+    <div class="share-row">
+      <button class="share-btn" onclick="doWhatsapp()">💬 WhatsApp</button>
+      <button class="share-btn" onclick="doTwitter()">🐦 Twitter</button>
+      <button class="share-btn" onclick="doTelegram()">✈️ Telegram</button>
+    </div>
+
+    <p style="font-size:0.7rem; color:#3d5c42; text-align:center; margin-top:14px;">Every signup using your link moves you up the list.</p>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+  // state
+  var user = {
+    email: '',
+    exam: '',
+    ai: '',
+    prob: '',
+    position: 0,
+    total: 0,
+    refs: 0,
+    movedUp: 0,
+    code: ''
+  };
+
+  var picked = { exam: null, ai: null, prob: null };
+
+  // on page load check if already signed up
+  window.onload = function() {
+    var saved = localStorage.getItem('phiprep_v1');
+    if (saved) {
+      user = JSON.parse(saved);
+      renderDashboard();
+      go('s-success');
+    } else {
+      // check referral in url
+      var p = new URLSearchParams(window.location.search);
+      if (p.get('ref')) localStorage.setItem('phi_ref', p.get('ref'));
+    }
+  };
+
+  function go(id) {
+    document.querySelectorAll('.screen').forEach(function(s) {
+      s.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  // email step
+  function doEmail() {
+    var v = document.getElementById('emailInput').value.trim();
+    if (!v) { document.getElementById('emailErr').textContent = 'Email is required.'; return; }
+    if (!v.includes('@') || !v.includes('.')) { document.getElementById('emailErr').textContent = 'Enter a valid email.'; return; }
+    user.email = v;
+    go('s-exam');
+  }
+
+  function clearErr() { document.getElementById('emailErr').textContent = ''; }
+
+  // enter key on email screen
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    var active = document.querySelector('.screen.active');
+    if (active && active.id === 's-email') doEmail();
+  });
+
+  // choice picker
+  function pick(group, btn) {
+    var parent = btn.parentElement;
+    parent.querySelectorAll('.choice-btn').forEach(function(b) { b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    picked[group] = btn.textContent.trim();
+  }
+
+  function doExam() {
+    if (!picked.exam) { toast('Please pick an option'); return; }
+    user.exam = picked.exam;
+    go('s-final');
+  }
+
+  function doFinal() {
+    user.ai = picked.ai || '';
+    user.prob = picked.prob || '';
+    signup();
+  }
+
+  function signup() {
+    // generate position — real app does this server-side
+    var base = Math.floor(Math.random() * 3000) + 800;
+
+    // if they came via a referral they get a boost
+    if (localStorage.getItem('phi_ref')) base = Math.floor(base * 0.82);
+
+    user.position = base;
+    user.total    = base + Math.floor(Math.random() * 1200) + 300;
+    user.refs     = 0;
+    user.movedUp  = 0;
+
+    // make referral code
+    var clean = user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+    user.code = clean + Math.floor(Math.random() * 9000 + 1000);
+
+    localStorage.setItem('phiprep_v1', JSON.stringify(user));
+
+    renderDashboard();
+    go('s-success');
+  }
+
+  function renderDashboard() {
+    // animate the position counting down — classic robinhood feel
+    countDown('posNum', user.position + 400, user.position, '#', 1100);
+    document.getElementById('totalNum').textContent = user.total.toLocaleString();
+    document.getElementById('refLinkText').textContent = window.location.href.split('?')[0] + '?ref=' + user.code;
+
+    updateMilestones(user.refs);
+
+    if (user.movedUp > 0) {
+      document.getElementById('movedNum').textContent = user.movedUp;
+      document.getElementById('movedBadge').classList.add('visible');
+      document.getElementById('posNum').classList.add('jumped');
+    }
+  }
+
+  // the counting animation
+  function countDown(elId, from, to, prefix, ms) {
+    var el = document.getElementById(elId);
+    var start = null;
+
+    function frame(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / ms, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var cur = Math.round(from - (from - to) * eased);
+      el.textContent = prefix + cur.toLocaleString();
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = prefix + to.toLocaleString();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function updateMilestones(refs) {
+    document.getElementById('refNum').textContent = refs;
+
+    var pct = Math.min((refs / 10) * 100, 100);
+    document.getElementById('refBar').style.width = pct + '%';
+
+    var hint = '';
+    if      (refs < 3)  hint = 'Refer ' + (3 - refs)  + ' more to skip 10 spots →';
+    else if (refs < 5)  hint = 'Refer ' + (5 - refs)  + ' more for beta access →';
+    else if (refs < 10) hint = 'Refer ' + (10 - refs) + ' more for 3 months free Pro →';
+    else                hint = '🎉 All milestones unlocked!';
+    document.getElementById('progressHint').textContent = hint;
+
+    document.getElementById('mc1').textContent = Math.min(refs, 3)  + ' / 3';
+    document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
+    document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
+
+    if (refs >= 3)  document.getElementById('m1').classList.add('done');
+    if (refs >= 5)  document.getElementById('m2').classList.add('done');
+    if (refs >= 10) document.getElementById('m3').classList.add('done');
+  }
+
+  function getRefUrl() {
+    return window.location.href.split('?')[0] + '?ref=' + user.code;
+  }
+
+  function doCopy() {
+    var url = getRefUrl();
+
+    // works on file://, http://, anywhere — no HTTPS needed
+    var temp = document.createElement('textarea');
+    temp.value = url;
+    temp.style.position = 'fixed';
+    temp.style.top = '0';
+    temp.style.left = '0';
+    temp.style.opacity = '0';
+    document.body.appendChild(temp);
+    temp.focus();
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+
+    var btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('done');
+    setTimeout(function() {
+      btn.textContent = 'Copy';
+      btn.classList.remove('done');
+    }, 2200);
+
+    fakeReferral();
+  }
+
+  // demo simulation — in real app your backend fires a webhook
+  function fakeReferral() {
+    if (user.refs >= 10) return;
+    setTimeout(function() {
+      user.refs += 1;
+      var gain = user.refs <= 3 ? 10 : 5;
+      user.position = Math.max(1, user.position - gain);
+      user.movedUp += gain;
+      localStorage.setItem('phiprep_v1', JSON.stringify(user));
+
+      document.getElementById('posNum').textContent = '#' + user.position.toLocaleString();
+      document.getElementById('posNum').classList.add('jumped');
+      document.getElementById('movedNum').textContent = user.movedUp;
+      document.getElementById('movedBadge').classList.add('visible');
+      updateMilestones(user.refs);
+
+      toast('↑ Someone joined using your link! You moved up ' + gain + ' spots');
+    }, 2200);
+  }
+
+  function doWhatsapp() {
+    var url = getRefUrl();
+    var msg = 'Just joined PhiPrep — an AI tutor that actually teaches you HOW to think through JEE problems, not just dump answers. Join here: ' + url;
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  function doTwitter() {
+    var url = getRefUrl();
+    var msg = 'Joined @PhiPrep waitlist — AI tutor built for serious JEE prep. Teaches thinking, not just answers. ' + url;
+    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  function doTelegram() {
+    var url = getRefUrl();
+    window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Join the PhiPrep waitlist for JEE prep AI'), '_blank');
+  }
+
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3200);
+  }
+
+</script>
+</body>
+</html>
