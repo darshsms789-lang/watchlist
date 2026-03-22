@@ -904,8 +904,36 @@
       localStorage.removeItem('phi_ref'); // clear so refreshing doesnt re-credit
     }
 
+    // send data to Google Sheets
+    saveToSheets(user);
+
     renderDashboard();
     go('s-success');
+  }
+
+  function saveToSheets(u) {
+    var SHEET_URL = 'https://script.google.com/macros/s/AKfycbzh230pqnOuXrTJWb7hUf9vMlH_RsWvH6ayG_GbSuS-fXcNJ8rTHcWMgiNx0H2MkAK3/exec';
+
+    var payload = {
+      email:      u.email,
+      exam:       u.exam,
+      ai:         u.ai,
+      problem:    u.prob,
+      position:   u.position,
+      code:       u.code,
+      referredBy: localStorage.getItem('phi_ref') || 'direct'
+    };
+
+    // using no-cors so it doesnt throw a cors error on static site
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(function(err) {
+      // silent fail — user still sees success, data saved in localStorage
+      console.log('sheet error:', err);
+    });
   }
 
   function renderDashboard() {
