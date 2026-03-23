@@ -721,7 +721,7 @@
     <div class="progress-track">
       <div class="progress-fill" id="refBar" style="width:0%"></div>
     </div>
-    <div class="progress-next" id="progressHint">Refer 3 friends to skip 10 spots →</div>
+    <div class="progress-next" id="progressHint">1 referral = 10 spots ahead →</div>
 
     <div class="divider"></div>
 
@@ -733,9 +733,9 @@
         <div class="ms-icon">⚡</div>
         <div class="ms-text">
           <div class="ms-title">Skip 10 spots</div>
-          <div class="ms-desc">Jump ahead of 10 people instantly</div>
+          <div class="ms-desc">1 referral = 10 spots ahead</div>
         </div>
-        <div class="ms-count" id="mc1">0 / 3</div>
+        <div class="ms-count" id="mc1">0 / 1</div>
       </div>
       <div class="ms-row" id="m2">
         <div class="ms-icon">🔑</div>
@@ -771,7 +771,7 @@
       <button class="share-btn" onclick="doTelegram()">✈️ Telegram</button>
     </div>
 
-    <p style="font-size:0.7rem; color:#3d5c42; text-align:center; margin-top:14px;">Every signup using your link moves you up the list.</p>
+    <p style="font-size:0.7rem; color:#3d5c42; text-align:center; margin-top:14px;">Every signup using your link = 10 spots ahead for you.</p>
 
   </div>
 
@@ -1073,17 +1073,17 @@
     document.getElementById('refBar').style.width = pct + '%';
 
     var hint = '';
-    if      (refs < 3)  hint = 'Refer ' + (3 - refs)  + ' more to skip 10 spots →';
+    if      (refs < 1)  hint = '1 referral = 10 spots ahead →';
     else if (refs < 5)  hint = 'Refer ' + (5 - refs)  + ' more for beta access →';
     else if (refs < 10) hint = 'Refer ' + (10 - refs) + ' more for 3 months free Pro →';
     else                hint = '🎉 All milestones unlocked!';
     document.getElementById('progressHint').textContent = hint;
 
-    document.getElementById('mc1').textContent = Math.min(refs, 3)  + ' / 3';
+    document.getElementById('mc1').textContent = Math.min(refs, 1)  + ' / 1';
     document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
     document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
 
-    if (refs >= 3)  document.getElementById('m1').classList.add('done');
+    if (refs >= 1)  document.getElementById('m1').classList.add('done');
     if (refs >= 5)  document.getElementById('m2').classList.add('done');
     if (refs >= 10) document.getElementById('m3').classList.add('done');
   }
