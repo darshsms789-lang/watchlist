@@ -9,7 +9,10 @@ export default async function handler(req, res) {
     const token = req.body?.token;
 
     if (!token) {
-      return res.status(400).json({ success: false, error: "No captcha token" });
+      return res.status(400).json({
+        success: false,
+        error: "No captcha token"
+      });
     }
 
     const secret = process.env.TURNSTILE_SECRET;
@@ -41,7 +44,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
 
-    console.error("VERIFY ERROR:", error);
+    console.error(error);
 
     return res.status(500).json({
       success: false,
