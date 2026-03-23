@@ -6,6 +6,7 @@
   <title>PhiPrep — Early Access</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <style>
 
@@ -694,7 +695,8 @@
       <button class="choice-btn" onclick="pick('prob', this)">Can't detect my mistake</button>
       <button class="choice-btn" onclick="pick('prob', this)">Not useful for JEE</button>
     </div>
-    <button class="btn-primary" style="margin-top:22px;" onclick="doFinal()">Join the Waitlist →</button>
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAACuv8_Yk78-b5UUC" data-theme="dark" style="margin-top:22px; margin-bottom:12px;"></div>
+    <button class="btn-primary" onclick="doFinal()">Join the Waitlist →</button>
     <button class="btn-skip" onclick="doFinal()">Skip and join</button>
   </div>
 
@@ -859,7 +861,7 @@
             // new referrals came in from other devices
             var newSignups = latestRefs - user.refs;
             for (var i = 0; i < newSignups; i++) {
-              var gain = (user.refs + i + 1) <= 3 ? 10 : 5;
+              var gain = 10;
               user.position = Math.max(1, user.position - gain);
               user.movedUp += gain;
             }
@@ -924,6 +926,12 @@
   }
 
   function doFinal() {
+    // check captcha is completed
+    var captcha = document.querySelector('[name="cf-turnstile-response"]');
+    if (!captcha || !captcha.value) {
+      toast('Please complete the captcha first');
+      return;
+    }
     user.ai = picked.ai || '';
     user.prob = picked.prob || '';
     signup();
@@ -966,7 +974,7 @@
           if (rows && rows.length > 0) {
             var referrer = rows[0];
             var newRefs = (referrer.refs || 0) + 1;
-            var gain = newRefs <= 3 ? 10 : 5;
+            var gain = 10;
             var newPos = Math.max(1, (referrer.position || 1) - gain);
             var newMovedUp = (referrer.moved_up || 0) + gain;
 
@@ -991,9 +999,19 @@
   }
 
   function saveToSheets(u) {
+    // rate limit — only one submission per 60 seconds from same browser
+    var lastSubmit = localStorage.getItem('phi_last_submit');
+    var now = Date.now();
+    if (lastSubmit && (now - parseInt(lastSubmit)) < 60000) {
+      console.log('rate limited');
+      return;
+    }
+    localStorage.setItem('phi_last_submit', now);
+
     var SHEET_URL = 'https://script.google.com/macros/s/AKfycbzh230pqnOuXrTJWb7hUf9vMlH_RsWvH6ayG_GbSuS-fXcNJ8rTHcWMgiNx0H2MkAK3/exec';
 
     var payload = {
+      token:      'phiprep_secret_2024',
       email:      u.email,
       exam:       u.exam,
       ai:         u.ai,
