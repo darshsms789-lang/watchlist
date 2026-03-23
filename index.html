@@ -850,16 +850,15 @@
     if (saved) {
       user = JSON.parse(saved);
 
-      // supabase is source of truth — just pull latest data directly
+      // always fetch fresh from supabase
       sbGetByEmail(user.email).then(function(rows) {
         if (rows && rows.length > 0) {
           var row = rows[0];
-
-          // just use whatever supabase has — no local calculations
-          var oldRefs = user.refs;
+          var oldRefs   = user.refs;
           user.position = row.position;
           user.refs     = row.refs || 0;
           user.movedUp  = row.moved_up || 0;
+          user.total    = row.total || user.total;
           localStorage.setItem('phiprep_v1', JSON.stringify(user));
 
           if (user.refs > oldRefs) {
@@ -873,8 +872,15 @@
 
       go('s-success');
     } else {
+      // new visitor
+      // if they have a ref code in url save it
+      // but make sure they are not saving THEIR OWN ref code
       if (refInUrl) {
-        localStorage.setItem('phi_ref', refInUrl);
+        var mySaved = localStorage.getItem('phiprep_v1');
+        var myCode = mySaved ? JSON.parse(mySaved).code : null;
+        if (refInUrl !== myCode) {
+          localStorage.setItem('phi_ref', refInUrl);
+        }
       }
     }
   };
@@ -961,7 +967,8 @@
         user.refs     = row.refs || 0;
         user.movedUp  = row.moved_up || 0;
         user.code     = row.code;
-        user.total    = row.total;
+        // recalculate total if missing in local storage
+        user.total    = row.total || (row.position + Math.floor(Math.random() * 800) + 200);
         localStorage.setItem('phiprep_v1', JSON.stringify(user));
         renderDashboard();
         go('s-success');
@@ -1038,7 +1045,7 @@
     });
   }
 
-  function saveToSheets(u) {
+  function saveToSheets(u, referredBy) {
     // rate limit — only one submission per 60 seconds from same browser
     var lastSubmit = localStorage.getItem('phi_last_submit');
     var now = Date.now();
@@ -1058,26 +1065,32 @@
       problem:    u.prob,
       position:   u.position,
       code:       u.code,
-      referredBy: localStorage.getItem('phi_ref') || 'direct'
+      referredBy: referredBy || 'direct'
     };
 
-    // using no-cors so it doesnt throw a cors error on static site
     fetch(SHEET_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).catch(function(err) {
-      // silent fail — user still sees success, data saved in localStorage
       console.log('sheet error:', err);
     });
   }
 
+  var dashboardRendered = false;
+
   function renderDashboard() {
-    // animate the position counting down — classic robinhood feel
-    countDown('posNum', user.position + 400, user.position, '#', 1100);
     document.getElementById('totalNum').textContent = user.total.toLocaleString();
-    document.getElementById('refLinkText').textContent = window.location.href.split('?')[0] + '?ref=' + user.code;
+    document.getElementById('refLinkText').textContent = getRefUrl();
+
+    // only animate countDown once — not on every refresh call
+    if (!dashboardRendered) {
+      countDown('posNum', user.position + 400, user.position, '#', 1100);
+      dashboardRendered = true;
+    } else {
+      document.getElementById('posNum').textContent = '#' + user.position.toLocaleString();
+    }
 
     updateMilestones(user.refs);
 
@@ -1137,7 +1150,9 @@
   }
 
   function getRefUrl() {
-    return window.location.href.split('?')[0] + '?ref=' + user.code;
+    // strip all query params from current url first then add ref
+    var base = window.location.origin + window.location.pathname;
+    return base + '?ref=' + user.code;
   }
 
   function doCopy() {
