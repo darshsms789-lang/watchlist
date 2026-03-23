@@ -767,52 +767,76 @@
 <script>
   var user = { email:'', exam:'', ai:'', prob:'', position:0, total:0, refs:0, movedUp:0, code:'' };
   var picked = { exam:null, ai:null, prob:null };
-  var dashboardRendered = false;
+  var dashRendered = false;
+  var signupInProgress = false; // bug fix: prevent double submit
 
-  var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
-  var SB_KEY = 'sb_publishable_KktwxQw0naHLSEU0lFpmTA_ElBTdFJ1';
-
-  function sbHeaders() {
-    return { 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY };
-  }
-  function sbInsert(data) {
-    return fetch(SB_URL+'/rest/v1/waitlist', { method:'POST', headers:Object.assign({},sbHeaders(),{'Prefer':'return=minimal'}), body:JSON.stringify(data) });
-  }
-  function sbGetByCode(code) {
-    return fetch(SB_URL+'/rest/v1/waitlist?code=eq.'+code+'&select=*', { method:'GET', headers:sbHeaders() }).then(function(r){return r.json();});
-  }
-  function sbGetByEmail(email) {
-    return fetch(SB_URL+'/rest/v1/waitlist?email=eq.'+encodeURIComponent(email)+'&select=*', { method:'GET', headers:sbHeaders() }).then(function(r){return r.json();});
-  }
-  function sbUpdate(code, data) {
-    return fetch(SB_URL+'/rest/v1/waitlist?code=eq.'+code, { method:'PATCH', headers:Object.assign({},sbHeaders(),{'Prefer':'return=minimal'}), body:JSON.stringify(data) });
-  }
-
+  // ── SECURITY HELPERS ──────────────────────────────────────────
   function sanitize(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+    return str
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+      .replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');
   }
   function safeGetLocal(key) {
-    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { localStorage.removeItem(key); return null; }
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
+    catch(e) { localStorage.removeItem(key); return null; }
   }
   function safeSetLocal(key, val) {
     try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
   }
   function isValidCode(code) {
+    // only allow alphanumeric 6-30 chars — blocks injection via ?ref=
     return typeof code === 'string' && /^[a-zA-Z0-9]{6,30}$/.test(code);
+  }
+  function isValidEmail(email) {
+    return typeof email === 'string' &&
+      /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email) &&
+      email.length <= 200;
   }
   function getRefUrl() {
     return window.location.origin + window.location.pathname + '?ref=' + user.code;
   }
 
+  // ── API CALLS — all go through /api/ server functions ─────────
+  // Supabase key is NEVER in this file — it lives in Vercel env vars
+
+  function apiGetUser(email) {
+    return fetch('/api/getuser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    }).then(function(r) { return r.json(); })
+      .then(function(d) { return d.data ? [d.data] : []; });
+  }
+
+  function apiSignup(data) {
+    return fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(function(r) { return r.json(); });
+  }
+
+  function apiReferral(code) {
+    return fetch('/api/referral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code })
+    }).then(function(r) { return r.json(); });
+  }
+
+  // ── PAGE LOAD ──────────────────────────────────────────────────
   window.onload = function() {
     var saved = safeGetLocal('phiprep_v1');
     var params = new URLSearchParams(window.location.search);
     var refInUrl = params.get('ref');
 
-    if (saved && saved.email && saved.code) {
+    if (saved && saved.email && saved.code && isValidEmail(saved.email)) {
       user = saved;
-      sbGetByEmail(user.email).then(function(rows) {
+
+      // fetch latest from server — server has the real data
+      apiGetUser(user.email).then(function(rows) {
         if (rows && rows.length > 0) {
           var row = rows[0];
           var oldRefs   = user.refs;
@@ -821,30 +845,40 @@
           user.movedUp  = parseInt(row.moved_up) || 0;
           user.total    = parseInt(row.total)    || user.total;
           safeSetLocal('phiprep_v1', user);
-          if (user.refs > oldRefs) toast('↑ New referral! You moved up '+(user.refs-oldRefs)*10+' spots.');
+          if (user.refs > oldRefs) {
+            toast('↑ New referral! You moved up ' + (user.refs - oldRefs) * 10 + ' spots.');
+          }
         }
         renderDashboard();
       }).catch(function() { renderDashboard(); });
+
       go('s-success');
     } else {
+      // new visitor — save ref code if valid and not their own
       if (refInUrl && isValidCode(refInUrl)) {
         var myCode = saved ? saved.code : null;
-        if (refInUrl !== myCode) localStorage.setItem('phi_ref', refInUrl);
+        if (refInUrl !== myCode) {
+          localStorage.setItem('phi_ref', refInUrl);
+        }
       }
     }
   };
 
+  // ── NAVIGATION ─────────────────────────────────────────────────
   function go(id) {
-    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.querySelectorAll('.screen').forEach(function(s) {
+      s.classList.remove('active');
+    });
     document.getElementById(id).classList.add('active');
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
   }
 
+  // ── FORM STEPS ─────────────────────────────────────────────────
   function doEmail() {
-    var v = document.getElementById('emailInput').value.trim();
+    var v = document.getElementById('emailInput').value.trim().toLowerCase();
     if (!v) { document.getElementById('emailErr').textContent = 'Email is required.'; return; }
-    if (!v.includes('@')||!v.includes('.')) { document.getElementById('emailErr').textContent = 'Enter a valid email.'; return; }
-    user.email = v.toLowerCase();
+    if (!isValidEmail(v)) { document.getElementById('emailErr').textContent = 'Enter a valid email address.'; return; }
+    user.email = v;
     go('s-exam');
   }
   function clearErr() { document.getElementById('emailErr').textContent = ''; }
@@ -856,9 +890,12 @@
   });
 
   function pick(group, btn) {
-    btn.parentElement.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('selected');});
+    btn.parentElement.querySelectorAll('.choice-btn').forEach(function(b) {
+      b.classList.remove('selected');
+    });
     btn.classList.add('selected');
-    picked[group] = btn.textContent.trim();
+    // sanitize choice text before storing
+    picked[group] = sanitize(btn.textContent.trim());
   }
 
   function doExam() {
@@ -867,9 +904,16 @@
     go('s-final');
   }
 
+  // bug fix: doFinalSkip also goes through captcha now
+  // removed skip bypass — was a security hole
+  function doFinalSkip() {
+    toast('Please complete the captcha to join.');
+  }
+
   function doFinal() {
     var joinBtn = document.querySelector('#s-final .btn-primary');
     if (joinBtn.disabled) return;
+    if (signupInProgress) return; // prevent double submit
 
     var captcha = document.querySelector('[name="cf-turnstile-response"]');
     var token = captcha ? captcha.value : '';
@@ -878,6 +922,7 @@
 
     joinBtn.disabled = true;
     joinBtn.textContent = 'Verifying...';
+    signupInProgress = true;
 
     fetch('/api/verify', {
       method: 'POST',
@@ -891,41 +936,54 @@
         user.prob = picked.prob || '';
         joinBtn.textContent = 'Joining...';
         signup(function(err) {
-          if (err) { joinBtn.disabled=false; joinBtn.textContent='Join the Waitlist →'; }
+          signupInProgress = false;
+          if (err) {
+            joinBtn.disabled = false;
+            joinBtn.textContent = 'Join the Waitlist →';
+          }
         });
       } else {
+        signupInProgress = false;
         toast('Captcha failed. Please try again.');
-        joinBtn.disabled=false;
-        joinBtn.textContent='Join the Waitlist →';
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join the Waitlist →';
       }
     })
     .catch(function() {
+      signupInProgress = false;
       toast('Connection error. Please try again.');
-      joinBtn.disabled=false;
-      joinBtn.textContent='Join the Waitlist →';
+      joinBtn.disabled = false;
+      joinBtn.textContent = 'Join the Waitlist →';
     });
   }
 
-  function doFinalSkip() {
-    user.ai   = picked.ai   || '';
-    user.prob = picked.prob || '';
-    signup(null);
-  }
-
+  // ── SIGNUP ─────────────────────────────────────────────────────
   function signup(onError) {
     var referrerCode = localStorage.getItem('phi_ref');
+
+    // validate referrer code — block tampered values
     if (referrerCode && !isValidCode(referrerCode)) {
       referrerCode = null;
       localStorage.removeItem('phi_ref');
     }
 
-    var safeEmail = user.email.toLowerCase().trim().slice(0,200);
-    var safeExam  = sanitize(user.exam).slice(0,50);
-    var safeAi    = sanitize(user.ai).slice(0,50);
-    var safeProb  = sanitize(user.prob).slice(0,100);
+    // sanitize all inputs before sending to server
+    var safeEmail = user.email.toLowerCase().trim().slice(0, 200);
+    var safeExam  = sanitize(user.exam).slice(0, 50);
+    var safeAi    = sanitize(user.ai).slice(0, 50);
+    var safeProb  = sanitize(user.prob).slice(0, 100);
 
-    sbGetByEmail(safeEmail).then(function(rows) {
+    // double check email is still valid
+    if (!isValidEmail(safeEmail)) {
+      toast('Invalid email. Please go back and try again.');
+      if (onError) onError(true);
+      return;
+    }
+
+    // check if already signed up via server
+    apiGetUser(safeEmail).then(function(rows) {
       if (rows && rows.length > 0) {
+        // already exists — load their data
         var row = rows[0];
         user.position = parseInt(row.position) || 1000;
         user.refs     = parseInt(row.refs)     || 0;
@@ -939,6 +997,7 @@
         return;
       }
 
+      // generate position
       var base = Math.floor(Math.random() * 3000) + 800;
       if (referrerCode) base = Math.floor(base * 0.82);
 
@@ -947,10 +1006,12 @@
       user.refs     = 0;
       user.movedUp  = 0;
 
-      var clean = safeEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g,'').slice(0,15);
+      // generate referral code — alphanumeric only
+      var clean = safeEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
       user.code = clean + Math.floor(Math.random() * 9000 + 1000);
 
-      sbInsert({
+      // send to server — server talks to Supabase, not browser
+      apiSignup({
         email:       safeEmail,
         exam:        safeExam,
         ai_usage:    safeAi,
@@ -962,31 +1023,26 @@
         code:        user.code,
         referred_by: referrerCode || 'direct'
       }).then(function(res) {
-        if (!res.ok && res.status !== 201) {
+        if (res.status === 'error') {
           toast('Something went wrong. Please try again.');
           if (onError) onError(true);
           return;
         }
 
+        // save to localStorage only after server confirms
         safeSetLocal('phiprep_v1', user);
 
+        // credit referrer via server
         if (referrerCode) {
-          sbGetByCode(referrerCode).then(function(rows) {
-            if (rows && rows.length > 0) {
-              var ref     = rows[0];
-              var newRefs = (parseInt(ref.refs) || 0) + 1;
-              var newPos  = Math.max(1, (parseInt(ref.position) || 1000) - 10);
-              sbUpdate(referrerCode, {
-                refs:     newRefs,
-                position: newPos,
-                moved_up: (parseInt(ref.moved_up) || 0) + 10
-              });
-            }
+          apiReferral(referrerCode).catch(function(e) {
+            console.log('referral credit error:', e);
           });
           localStorage.removeItem('phi_ref');
         }
 
-        saveToSheets(user, referrerCode);
+        // save to sheets via server
+        saveToSheets(safeEmail, safeExam, safeAi, safeProb, user.position, user.code, referrerCode || 'direct');
+
         renderDashboard();
         go('s-success');
 
@@ -1001,7 +1057,10 @@
     });
   }
 
-  function saveToSheets(u, referredBy) {
+  // sheets token moved to server — but since sheets uses no-cors
+  // we keep it here with rate limiting as backup
+  // note: move this to an api route in future for full security
+  function saveToSheets(email, exam, ai, prob, position, code, referredBy) {
     var lastSubmit = localStorage.getItem('phi_last_submit');
     var now = Date.now();
     if (lastSubmit && (now - parseInt(lastSubmit)) < 60000) return;
@@ -1012,20 +1071,15 @@
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        token:      'phiprep_secret_2024',
-        email:      u.email,
-        exam:       u.exam,
-        ai:         u.ai,
-        problem:    u.prob,
-        position:   u.position,
-        code:       u.code,
-        referredBy: referredBy || 'direct'
+        token: 'phiprep_secret_2024',
+        email: email, exam: exam, ai: ai,
+        problem: prob, position: position,
+        code: code, referredBy: referredBy
       })
-    }).catch(function(e){ console.log('sheets error:',e); });
+    }).catch(function() {});
   }
 
-  var dashRendered = false;
-
+  // ── DASHBOARD ──────────────────────────────────────────────────
   function renderDashboard() {
     document.getElementById('totalNum').textContent = user.total.toLocaleString();
     document.getElementById('refLinkText').textContent = getRefUrl();
@@ -1053,8 +1107,7 @@
       if (!start) start = ts;
       var p = Math.min((ts - start) / ms, 1);
       var eased = 1 - Math.pow(1 - p, 3);
-      var cur = Math.round(from - (from - to) * eased);
-      el.textContent = prefix + cur.toLocaleString();
+      el.textContent = prefix + Math.round(from - (from - to) * eased).toLocaleString();
       if (p < 1) requestAnimationFrame(frame);
       else el.textContent = prefix + to.toLocaleString();
     }
@@ -1063,18 +1116,17 @@
 
   function updateMilestones(refs) {
     document.getElementById('refNum').textContent = refs;
-    document.getElementById('refBar').style.width = Math.min((refs/10)*100, 100) + '%';
+    document.getElementById('refBar').style.width = Math.min((refs / 10) * 100, 100) + '%';
 
-    var hint = '';
-    if      (refs < 1)  hint = '1 referral = 10 spots ahead';
-    else if (refs < 5)  hint = (5-refs) + ' more for beta access';
-    else if (refs < 10) hint = (10-refs) + ' more for 3 months free Pro';
-    else                hint = 'All rewards unlocked!';
+    var hint = refs < 1  ? '1 referral = 10 spots ahead'         :
+               refs < 5  ? (5 - refs)  + ' more for beta access' :
+               refs < 10 ? (10 - refs) + ' more for 3 months free Pro' :
+                           'All rewards unlocked!';
     document.getElementById('progressHint').textContent = hint;
 
-    document.getElementById('mc1').textContent = Math.min(refs,1)  + ' / 1';
-    document.getElementById('mc2').textContent = Math.min(refs,5)  + ' / 5';
-    document.getElementById('mc3').textContent = Math.min(refs,10) + ' / 10';
+    document.getElementById('mc1').textContent = Math.min(refs, 1)  + ' / 1';
+    document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
+    document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
 
     if (refs >= 1)  document.getElementById('m1').classList.add('done');
     if (refs >= 5)  document.getElementById('m2').classList.add('done');
@@ -1083,6 +1135,7 @@
     if (refs < 10)  document.getElementById('m3').classList.remove('done');
   }
 
+  // ── COPY + SHARE ───────────────────────────────────────────────
   function doCopy() {
     var url = getRefUrl();
     var temp = document.createElement('textarea');
@@ -1095,28 +1148,28 @@
     var btn = document.getElementById('copyBtn');
     btn.textContent = 'Copied!';
     btn.classList.add('done');
-    setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('done'); }, 2000);
+    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 2000);
     toast('Link copied! Share it with your friends.');
   }
 
   function doWhatsapp() {
     var url = getRefUrl();
-    window.open('https://wa.me/?text='+encodeURIComponent('I joined the PhiPrep waitlist — an AI tutor that teaches you HOW to think through JEE problems. Join here: '+url),'_blank');
+    window.open('https://wa.me/?text=' + encodeURIComponent('I joined the PhiPrep waitlist — an AI tutor that teaches you HOW to think through JEE problems. Join here: ' + url), '_blank');
   }
   function doTwitter() {
     var url = getRefUrl();
-    window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('Just joined @PhiPrep — AI tutor for serious JEE prep. Teaches thinking, not just answers. '+url),'_blank');
+    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent('Just joined @PhiPrep — AI tutor for JEE prep. Teaches thinking, not just answers. ' + url), '_blank');
   }
   function doTelegram() {
     var url = getRefUrl();
-    window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent('Join PhiPrep waitlist for JEE prep'),'_blank');
+    window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Join PhiPrep waitlist for JEE prep'), '_blank');
   }
 
   function toast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
   }
 </script>
 </body>
