@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PhiPrep — Early Access</title>
 
+  <!-- security headers -->
+  <!-- CSP - only allow scripts from trusted sources -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://fonts.googleapis.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
+    font-src 'self' https://fonts.gstatic.com;
+    connect-src 'self' https://zuidgbvnyonyxzfsepox.supabase.co https://script.google.com https://challenges.cloudflare.com;
+    frame-src https://challenges.cloudflare.com;
+    img-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  "/>
+
+  <!-- prevent clickjacking -->
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+
+  <!-- prevent MIME sniffing -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+
+  <!-- referrer policy — dont leak url to third parties -->
+  <meta name="referrer" content="strict-origin-when-cross-origin"/>
+
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
@@ -610,9 +634,202 @@
     }
 
     @media (max-width: 520px) {
-      .screen { padding: 28px 20px 24px; }
-      h1 { font-size: 1.4rem; }
-      .pos-number { font-size: 3.2rem; }
+
+      body {
+        padding: 12px;
+        align-items: flex-start;
+      }
+
+      .card {
+        border-radius: 14px;
+        width: 100%;
+      }
+
+      .screen {
+        padding: 24px 18px 20px;
+      }
+
+      h1 {
+        font-size: 1.35rem;
+        line-height: 1.25;
+      }
+
+      .subtitle {
+        font-size: 0.88rem;
+      }
+
+      .bullet-item {
+        font-size: 0.85rem;
+      }
+
+      .q-title {
+        font-size: 1rem;
+      }
+
+      /* position number — shrink so it fits */
+      .pos-number {
+        font-size: 2.6rem;
+      }
+
+      .pos-total {
+        font-size: 0.82rem;
+      }
+
+      /* position card tighter */
+      .position-card {
+        padding: 20px 16px;
+      }
+
+      /* ref row — stack vertically on very small screens */
+      .ref-row {
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .ref-row-label {
+        font-size: 0.85rem;
+      }
+
+      .ref-row-num {
+        font-size: 0.85rem;
+      }
+
+      /* progress hint wraps properly */
+      .progress-next {
+        font-size: 0.75rem;
+        white-space: normal;
+        word-break: break-word;
+      }
+
+      /* milestone rows — tighter */
+      .ms-row {
+        padding: 10px 10px;
+        gap: 8px;
+      }
+
+      .ms-title {
+        font-size: 0.82rem;
+      }
+
+      .ms-desc {
+        font-size: 0.7rem;
+      }
+
+      .ms-count {
+        font-size: 0.75rem;
+        min-width: 32px;
+        text-align: right;
+      }
+
+      .ms-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      /* referral link box — stack on mobile */
+      .ref-link-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .ref-link-display {
+        font-size: 0.72rem;
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .copy-btn {
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+      }
+
+      /* share buttons — smaller text */
+      .share-btn {
+        font-size: 0.75rem;
+        padding: 10px 4px;
+        gap: 3px;
+      }
+
+      /* choice buttons */
+      .choice-btn {
+        font-size: 0.88rem;
+        padding: 12px 14px;
+      }
+
+      /* primary button */
+      .btn-primary {
+        font-size: 0.92rem;
+        padding: 14px;
+      }
+
+      /* email input */
+      .email-input {
+        font-size: 0.92rem;
+        padding: 13px 14px;
+      }
+
+      /* toast wraps on small screens */
+      .toast {
+        white-space: normal;
+        text-align: center;
+        width: 90%;
+        font-size: 0.8rem;
+        padding: 10px 16px;
+      }
+
+      /* moved up badge */
+      .moved-up-badge {
+        font-size: 0.72rem;
+        padding: 5px 12px;
+      }
+
+      /* milestones section label */
+      .milestones {
+        gap: 8px;
+      }
+
+      /* bottom note */
+      .card p[style] {
+        font-size: 0.72rem !important;
+      }
+
+      /* turnstile captcha centering */
+      .cf-turnstile {
+        display: flex;
+        justify-content: center;
+      }
+
+    }
+
+    /* extra small — like 360px Android phones */
+    @media (max-width: 380px) {
+
+      .pos-number {
+        font-size: 2.2rem;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      .share-btn {
+        font-size: 0.68rem;
+        padding: 9px 3px;
+      }
+
+      .ms-title {
+        font-size: 0.78rem;
+      }
+
+      .ref-link-display {
+        font-size: 0.65rem;
+      }
+
     }
 
   </style>
@@ -842,24 +1059,61 @@
     });
   }
 
+  // sanitize any string before using it — prevents XSS
+  function sanitize(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  }
+
+  // safe localStorage get — never crash if data is corrupt
+  function safeGetLocal(key) {
+    try {
+      var val = localStorage.getItem(key);
+      return val ? JSON.parse(val) : null;
+    } catch(e) {
+      localStorage.removeItem(key);
+      return null;
+    }
+  }
+
+  // safe localStorage set
+  function safeSetLocal(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch(e) {
+      console.log('localStorage full or blocked');
+    }
+  }
+
+  // validate referral code — only alphanumeric allowed
+  // prevents someone injecting code via ?ref= in url
+  function isValidCode(code) {
+    return typeof code === 'string' && /^[a-zA-Z0-9]{6,30}$/.test(code);
+  }
+
   window.onload = function() {
-    var saved = localStorage.getItem('phiprep_v1');
+    var saved = safeGetLocal('phiprep_v1');
     var params = new URLSearchParams(window.location.search);
     var refInUrl = params.get('ref');
 
-    if (saved) {
-      user = JSON.parse(saved);
+    if (saved && saved.email && saved.code) {
+      user = saved;
 
-      // always fetch fresh from supabase
       sbGetByEmail(user.email).then(function(rows) {
         if (rows && rows.length > 0) {
           var row = rows[0];
           var oldRefs   = user.refs;
-          user.position = row.position;
-          user.refs     = row.refs || 0;
-          user.movedUp  = row.moved_up || 0;
-          user.total    = row.total || user.total;
-          localStorage.setItem('phiprep_v1', JSON.stringify(user));
+          user.position = parseInt(row.position) || user.position;
+          user.refs     = parseInt(row.refs)     || 0;
+          user.movedUp  = parseInt(row.moved_up) || 0;
+          user.total    = parseInt(row.total)    || user.total;
+          safeSetLocal('phiprep_v1', user);
 
           if (user.refs > oldRefs) {
             toast('↑ New referral! You moved up ' + (user.refs - oldRefs) * 10 + ' spots.');
@@ -872,12 +1126,9 @@
 
       go('s-success');
     } else {
-      // new visitor
-      // if they have a ref code in url save it
-      // but make sure they are not saving THEIR OWN ref code
-      if (refInUrl) {
-        var mySaved = localStorage.getItem('phiprep_v1');
-        var myCode = mySaved ? JSON.parse(mySaved).code : null;
+      // validate ref code before saving — block injection attempts
+      if (refInUrl && isValidCode(refInUrl)) {
+        var myCode = saved ? saved.code : null;
         if (refInUrl !== myCode) {
           localStorage.setItem('phi_ref', refInUrl);
         }
@@ -958,41 +1209,49 @@
   function signup(onError) {
     var referrerCode = localStorage.getItem('phi_ref');
 
-    // check if email already signed up in supabase before doing anything
-    sbGetByEmail(user.email).then(function(rows) {
+    // validate referrer code before using it
+    if (referrerCode && !isValidCode(referrerCode)) {
+      referrerCode = null;
+      localStorage.removeItem('phi_ref');
+    }
+
+    // sanitize all user inputs before sending to database
+    var safeEmail = user.email.toLowerCase().trim().slice(0, 200);
+    var safeExam  = sanitize(user.exam).slice(0, 50);
+    var safeAi    = sanitize(user.ai).slice(0, 50);
+    var safeProb  = sanitize(user.prob).slice(0, 100);
+
+    sbGetByEmail(safeEmail).then(function(rows) {
       if (rows && rows.length > 0) {
-        // already signed up — just load their existing data
         var row = rows[0];
-        user.position = row.position;
-        user.refs     = row.refs || 0;
-        user.movedUp  = row.moved_up || 0;
+        user.position = parseInt(row.position) || 1000;
+        user.refs     = parseInt(row.refs)     || 0;
+        user.movedUp  = parseInt(row.moved_up) || 0;
         user.code     = row.code;
-        // recalculate total if missing in local storage
-        user.total    = row.total || (row.position + Math.floor(Math.random() * 800) + 200);
-        localStorage.setItem('phiprep_v1', JSON.stringify(user));
+        user.total    = parseInt(row.total)    || (user.position + 500);
+        safeSetLocal('phiprep_v1', user);
         renderDashboard();
         go('s-success');
         toast('Welcome back! Your spot is saved.');
         return;
       }
 
-      // not signed up yet — proceed
       var base = Math.floor(Math.random() * 3000) + 800;
       if (referrerCode) base = Math.floor(base * 0.82);
 
-      user.position = Math.max(1, base); // never let position be 0
+      user.position = Math.max(1, base);
       user.total    = base + Math.floor(Math.random() * 1200) + 300;
       user.refs     = 0;
       user.movedUp  = 0;
 
-      var clean = user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+      var clean = safeEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
       user.code = clean + Math.floor(Math.random() * 9000 + 1000);
 
       sbInsert({
-        email:       user.email,
-        exam:        user.exam,
-        ai_usage:    user.ai,
-        problem:     user.prob,
+        email:       safeEmail,
+        exam:        safeExam,
+        ai_usage:    safeAi,
+        problem:     safeProb,
         position:    user.position,
         total:       user.total,
         refs:        0,
@@ -1006,30 +1265,26 @@
           return;
         }
 
-        // save locally only after supabase confirms
-        localStorage.setItem('phiprep_v1', JSON.stringify(user));
+        safeSetLocal('phiprep_v1', user);
 
-        // credit the referrer
         if (referrerCode) {
           sbGetByCode(referrerCode).then(function(rows) {
             if (rows && rows.length > 0) {
               var referrer = rows[0];
-              var newRefs  = (referrer.refs || 0) + 1;
-              var oldPos   = referrer.position || 1000;
+              var newRefs  = (parseInt(referrer.refs) || 0) + 1;
+              var oldPos   = parseInt(referrer.position) || 1000;
               var newPos   = Math.max(1, oldPos - 10);
               sbUpdate(referrerCode, {
                 refs:     newRefs,
                 position: newPos,
-                moved_up: (referrer.moved_up || 0) + 10
+                moved_up: (parseInt(referrer.moved_up) || 0) + 10
               });
             }
           });
           localStorage.removeItem('phi_ref');
         }
 
-        // save to sheets with correct referredBy
         saveToSheets(user, referrerCode);
-
         renderDashboard();
         go('s-success');
 
