@@ -3,580 +3,518 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PhiPrep — Early Access</title>
+  <title>PhiPrep — Join the Waitlist</title>
 
-  <!-- security headers -->
-  <!-- CSP - only allow scripts from trusted sources -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://fonts.googleapis.com;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
-    font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://zuidgbvnyonyxzfsepox.supabase.co https://script.google.com https://challenges.cloudflare.com;
-    frame-src https://challenges.cloudflare.com;
-    img-src 'self' data:;
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-  "/>
-
-  <!-- prevent clickjacking -->
-  <meta http-equiv="X-Frame-Options" content="DENY"/>
-
-  <!-- prevent MIME sniffing -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://zuidgbvnyonyxzfsepox.supabase.co https://script.google.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data:; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
-
-  <!-- referrer policy — dont leak url to third parties -->
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
 
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg:      #f7f4ef;
+      --card:    #ffffff;
+      --border:  #d4cfc8;
+      --text:    #1a1a1a;
+      --muted:   #6b6560;
+      --light:   #9e9892;
+      --accent:  #2a5c3f;
+      --accent2: #3d7a57;
+      --danger:  #c0392b;
+      --gold:    #c8a84b;
     }
 
+    html { scroll-behavior: smooth; }
+
     body {
-      background: #080d09;
-      color: #dceadc;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 32px 20px;
     }
 
+    /* subtle paper texture */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-      opacity: 0.022;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
       pointer-events: none;
       z-index: 0;
     }
 
-    .card {
-      background: #0d1510;
-      border: 1px solid rgba(74, 160, 90, 0.22);
-      border-radius: 20px;
+    .wrap {
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       position: relative;
       z-index: 1;
-      overflow: hidden;
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 260px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #3fa663, transparent);
+    /* top brand */
+    .top-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .top-brand .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .top-brand .logo span {
+      color: var(--accent);
+    }
+
+    .top-brand .tagline {
+      font-size: 0.8rem;
+      color: var(--light);
+      margin-top: 4px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
     }
 
     .screen {
       display: none;
-      padding: 40px 36px 36px;
-      animation: fadeUp 0.35s ease;
+      padding: 36px 32px 32px;
+      animation: fadeIn 0.25s ease;
     }
 
-    .screen.active {
-      display: block;
-    }
+    .screen.active { display: block; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* brand tag */
-    .brand {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #4ecc7a;
-      margin-bottom: 28px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .brand::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #4ecc7a;
-      box-shadow: 0 0 8px #4ecc7a;
-    }
-
-    h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.65rem;
-      font-weight: 800;
-      color: #f0f7f1;
-      line-height: 1.2;
-      margin-bottom: 10px;
-    }
-
-    .subtitle {
-      font-size: 1rem;
-      font-weight: 400;
-      color: #c2dfc6;
-      line-height: 1.75;
-      margin-bottom: 28px;
-    }
-
-    /* bullet list on welcome */
-    .bullet-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 32px;
-    }
-
-    .bullet-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #dceadc;
-      line-height: 1.5;
-    }
-
-    .bullet-item::before {
-      content: '';
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #4ecc7a;
-      flex-shrink: 0;
-      margin-top: 6px;
-    }
-
-    /* step progress dots */
+    /* step bar */
     .step-bar {
       display: flex;
-      gap: 5px;
-      margin-bottom: 30px;
+      gap: 4px;
+      margin-bottom: 28px;
     }
 
     .step-dot {
-      height: 3px;
+      height: 2px;
       flex: 1;
-      border-radius: 100px;
-      background: rgba(74, 160, 90, 0.12);
+      background: #e8e4de;
+      border-radius: 2px;
       transition: background 0.3s;
     }
 
-    .step-dot.done { background: #4ecc7a; }
-    .step-dot.active { background: rgba(78, 204, 122, 0.45); }
+    .step-dot.done { background: var(--accent); }
+    .step-dot.active { background: #7ab595; }
 
-    /* question labels */
-    .q-label {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
+    /* headings */
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
       font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    /* bullet list */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 28px;
+      padding: 20px;
+      background: #f9f7f4;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .feature-item::before {
+      content: '→';
+      color: var(--accent);
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-top: 0px;
+    }
+
+    /* question label */
+    .q-label {
+      font-size: 0.7rem;
+      font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #c2dfc6;
-      margin-bottom: 8px;
+      color: var(--light);
+      margin-bottom: 6px;
     }
 
     .q-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #f0f7f1;
-      line-height: 1.35;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
       margin-bottom: 20px;
     }
 
     /* email input */
     .email-input {
       width: 100%;
-      background: #111c13;
-      border: 1px solid rgba(74, 160, 90, 0.2);
-      border-radius: 10px;
-      padding: 14px 16px;
-      color: #f0f7f1;
-      font-family: 'DM Sans', sans-serif;
+      background: #fafaf9;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      padding: 13px 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
       outline: none;
       transition: border-color 0.2s;
       margin-bottom: 6px;
     }
 
-    .email-input::placeholder { color: #c2dfc6; }
-    .email-input:focus { border-color: #3fa663; }
+    .email-input::placeholder { color: #bbb8b2; }
+    .email-input:focus { border-color: var(--accent); }
 
     .input-error {
-      font-size: 0.9rem;
-      color: #e07777;
+      font-size: 0.78rem;
+      color: var(--danger);
       min-height: 18px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
-    /* multiple choice */
+    /* choices */
     .choices {
       display: flex;
       flex-direction: column;
-      gap: 9px;
-      margin-bottom: 24px;
+      gap: 7px;
+      margin-bottom: 20px;
     }
 
     .choice-btn {
       width: 100%;
-      padding: 14px 16px;
-      background: #111c13;
-      border: 1px solid rgba(74, 160, 90, 0.16);
-      border-radius: 10px;
-      color: #dceadc;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1rem;
-      font-weight: 500;
+      padding: 11px 14px;
+      background: #fafaf9;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
       text-align: left;
       cursor: pointer;
       transition: all 0.15s;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .choice-btn::before {
       content: '';
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      border: 1.5px solid rgba(74, 160, 90, 0.28);
+      border: 1.5px solid #ccc;
       flex-shrink: 0;
       transition: all 0.15s;
     }
 
     .choice-btn:hover {
-      border-color: rgba(78, 204, 122, 0.32);
-      background: rgba(45, 122, 71, 0.07);
+      border-color: var(--accent2);
+      background: #f4f9f6;
     }
 
     .choice-btn.selected {
-      border-color: #3fa663;
-      background: rgba(45, 122, 71, 0.14);
-      color: #f0f7f1;
+      border-color: var(--accent);
+      background: #edf5f0;
+      color: var(--accent);
+      font-weight: 500;
     }
 
     .choice-btn.selected::before {
-      background: #4ecc7a;
-      border-color: #4ecc7a;
-      box-shadow: 0 0 8px rgba(78, 204, 122, 0.4);
+      background: var(--accent);
+      border-color: var(--accent);
     }
 
-    /* primary button */
+    /* buttons */
     .btn-primary {
       width: 100%;
-      padding: 15px;
-      background: #2d7a47;
+      padding: 13px;
+      background: var(--accent);
       border: none;
-      border-radius: 10px;
-      color: #f0f7f1;
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
+      border-radius: 3px;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
       cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
+      transition: background 0.2s;
     }
 
-    .btn-primary:hover {
-      background: #3fa663;
-      box-shadow: 0 8px 28px rgba(63, 166, 99, 0.32);
-    }
-
-    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:hover { background: var(--accent2); }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { background: #999; cursor: not-allowed; }
 
     .btn-skip {
       width: 100%;
       padding: 10px;
       background: transparent;
       border: none;
-      color: #c2dfc6;
-      font-size: 0.9rem;
-      font-weight: 500;
+      color: var(--light);
+      font-size: 0.8rem;
       cursor: pointer;
-      margin-top: 8px;
-      font-family: 'DM Sans', sans-serif;
+      margin-top: 6px;
+      font-family: 'Inter', sans-serif;
       transition: color 0.2s;
     }
 
-    .btn-skip:hover { color: #dceadc; }
+    .btn-skip:hover { color: var(--muted); }
 
     /* divider */
     .divider {
       height: 1px;
-      background: rgba(74, 160, 90, 0.1);
+      background: var(--border);
       margin: 20px 0;
     }
 
-    /* ---- SUCCESS DASHBOARD ---- */
+    /* SUCCESS DASHBOARD */
 
-    /* big position card - this is the robinhood part */
-    .position-card {
-      background: #060c07;
-      border: 1px solid rgba(74, 160, 90, 0.2);
-      border-radius: 14px;
-      padding: 28px 24px;
+    .success-header {
       text-align: center;
-      margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
+      padding: 28px 20px 24px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .position-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 180px; height: 1px;
-      background: linear-gradient(90deg, transparent, #3fa663, transparent);
+    .success-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
     }
 
-    /* subtle glow behind number */
-    .position-card::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 180px; height: 180px;
-      background: radial-gradient(circle, rgba(45,122,71,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .pos-label {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.92rem;
+    .position-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 4.5rem;
       font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 6px;
+      letter-spacing: -0.03em;
+    }
+
+    .position-number.moved { color: var(--accent); }
+
+    .position-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .moved-badge {
+      display: none;
+      margin: 10px auto 0;
+      background: #edf5f0;
+      border: 1px solid #b8d9c5;
+      border-radius: 100px;
+      padding: 4px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      width: fit-content;
+    }
+
+    .moved-badge.visible { display: block; }
+
+    /* referral progress */
+    .section-block {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #c2dfc6;
+      color: var(--light);
       margin-bottom: 14px;
     }
 
-    .pos-number {
-      font-family: 'Syne', sans-serif;
-      font-size: 4rem;
-      font-weight: 800;
-      color: #f0f7f1;
-      line-height: 1;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
-      transition: color 0.4s;
-    }
-
-    .pos-number.jumped {
-      color: #4ecc7a;
-    }
-
-    .pos-total {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #c2dfc6;
-      position: relative;
-      z-index: 1;
-    }
-
-    .moved-up-badge {
-      display: none;
-      margin: 12px auto 0;
-      background: rgba(45, 122, 71, 0.18);
-      border: 1px solid rgba(78, 204, 122, 0.22);
-      border-radius: 100px;
-      padding: 6px 16px;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.92rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: #4ecc7a;
-      width: fit-content;
-      position: relative;
-      z-index: 1;
-    }
-
-    .moved-up-badge.visible {
-      display: block;
-    }
-
-    /* referral progress row */
-    .ref-row {
+    .ref-count-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 8px;
     }
 
-    .ref-row-label {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #c2dfc6;
-    }
-
-    .ref-row-num {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #4ecc7a;
+    .ref-count-label { font-size: 0.875rem; color: var(--muted); }
+    .ref-count-num {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--accent);
     }
 
     .progress-track {
-      background: rgba(74, 160, 90, 0.08);
+      background: #e8e4de;
       border-radius: 100px;
-      height: 6px;
+      height: 4px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .progress-fill {
       height: 100%;
+      background: var(--accent);
       border-radius: 100px;
-      background: linear-gradient(90deg, #2d7a47, #4ecc7a);
-      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: width 0.8s ease;
     }
 
-    .progress-next {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #c2dfc6;
+    .progress-hint {
+      font-size: 0.75rem;
+      color: var(--light);
       text-align: right;
     }
 
     /* milestones */
-    .milestones {
+    .milestone-list {
       display: flex;
       flex-direction: column;
-      gap: 9px;
-      margin-bottom: 20px;
+      gap: 8px;
     }
 
-    .ms-row {
+    .ms-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 11px 14px;
-      background: #111c13;
-      border: 1px solid rgba(74, 160, 90, 0.13);
-      border-radius: 10px;
-      transition: all 0.3s;
+      padding: 10px 12px;
+      background: #fafaf9;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      transition: all 0.2s;
     }
 
-    .ms-row.done {
-      border-color: rgba(78, 204, 122, 0.32);
-      background: rgba(45, 122, 71, 0.1);
+    .ms-item.done {
+      background: #edf5f0;
+      border-color: #b8d9c5;
     }
 
-    .ms-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      border: 1px solid rgba(74, 160, 90, 0.18);
-      background: rgba(45, 122, 71, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    .ms-row.done .ms-icon {
-      border-color: rgba(78, 204, 122, 0.38);
-      background: rgba(45, 122, 71, 0.22);
-    }
-
-    .ms-text { flex: 1; }
-
-    .ms-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.9rem;
+    .ms-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #dceadc;
-      margin-bottom: 3px;
+      color: #ccc;
+      min-width: 28px;
     }
 
-    .ms-row.done .ms-title { color: #4ecc7a; }
+    .ms-item.done .ms-num { color: var(--accent); }
+
+    .ms-info { flex: 1; }
+
+    .ms-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .ms-item.done .ms-name { color: var(--accent); }
 
     .ms-desc {
-      font-size: 0.95rem;
-      font-weight: 400;
-      color: #c2dfc6;
+      font-size: 0.75rem;
+      color: var(--light);
     }
 
     .ms-count {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #c2dfc6;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--light);
       white-space: nowrap;
     }
 
-    .ms-row.done .ms-count { color: #4ecc7a; }
+    .ms-item.done .ms-count { color: var(--accent); }
 
-    /* referral link box */
-    .ref-link-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
+    /* referral link */
+    .ref-link-wrap {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .ref-link-display {
+    .ref-link-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ref-link-text {
       flex: 1;
-      background: #111c13;
-      border: 1px solid rgba(74, 160, 90, 0.18);
-      border-radius: 9px;
-      padding: 12px 14px;
-      color: #4ecc7a;
+      background: #f4f2ee;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 10px 12px;
       font-family: 'Courier New', monospace;
-      font-size: 0.95rem;
-      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--accent);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .copy-btn {
-      padding: 12px 20px;
-      background: rgba(45, 122, 71, 0.18);
-      border: 1px solid rgba(78, 204, 122, 0.22);
-      border-radius: 9px;
-      color: #4ecc7a;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
+      padding: 10px 16px;
+      background: var(--text);
+      border: none;
+      border-radius: 3px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
       white-space: nowrap;
+      transition: background 0.2s;
     }
 
-    .copy-btn:hover {
-      background: rgba(45, 122, 71, 0.3);
+    .copy-btn:hover { background: #333; }
+    .copy-btn.done { background: var(--accent); }
+
+    /* share buttons */
+    .share-wrap {
+      padding: 16px 24px 20px;
     }
 
-    .copy-btn.done {
-      background: #2d7a47;
-      color: #f0f7f1;
-    }
-
-    /* share row */
     .share-row {
       display: flex;
       gap: 8px;
@@ -584,48 +522,53 @@
 
     .share-btn {
       flex: 1;
-      padding: 12px 6px;
-      background: #111c13;
-      border: 1px solid rgba(74, 160, 90, 0.14);
-      border-radius: 9px;
-      color: #c2dfc6;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
+      padding: 10px 6px;
+      background: #fafaf9;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 5px;
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
 
     .share-btn:hover {
-      border-color: rgba(78, 204, 122, 0.28);
-      color: #dceadc;
-      background: rgba(45, 122, 71, 0.07);
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #edf5f0;
+    }
+
+    .foot-note {
+      font-size: 0.75rem;
+      color: var(--light);
+      text-align: center;
+      padding: 0 24px 16px;
     }
 
     /* toast */
     .toast {
       position: fixed;
-      bottom: 28px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(10px);
-      background: #2d7a47;
-      color: #f0f7f1;
-      padding: 10px 22px;
-      border-radius: 10px;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.92rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
+      background: var(--text);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 3px;
+      font-size: 0.82rem;
+      font-weight: 500;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s, transform 0.2s;
       z-index: 999;
-      white-space: nowrap;
+      max-width: 90%;
+      text-align: center;
     }
 
     .toast.show {
@@ -633,468 +576,233 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* turnstile */
+    .cf-turnstile {
+      margin: 16px 0 12px;
+    }
+
+    /* mobile */
     @media (max-width: 520px) {
-
-      body {
-        padding: 12px;
-        align-items: flex-start;
-      }
-
-      .card {
-        border-radius: 14px;
-        width: 100%;
-      }
-
-      .screen {
-        padding: 24px 18px 20px;
-      }
-
-      h1 {
-        font-size: 1.35rem;
-        line-height: 1.25;
-      }
-
-      .subtitle {
-        font-size: 0.88rem;
-      }
-
-      .bullet-item {
-        font-size: 0.85rem;
-      }
-
-      .q-title {
-        font-size: 1rem;
-      }
-
-      /* position number — shrink so it fits */
-      .pos-number {
-        font-size: 2.6rem;
-      }
-
-      .pos-total {
-        font-size: 0.82rem;
-      }
-
-      /* position card tighter */
-      .position-card {
-        padding: 20px 16px;
-      }
-
-      /* ref row — stack vertically on very small screens */
-      .ref-row {
-        flex-wrap: wrap;
-        gap: 4px;
-      }
-
-      .ref-row-label {
-        font-size: 0.85rem;
-      }
-
-      .ref-row-num {
-        font-size: 0.85rem;
-      }
-
-      /* progress hint wraps properly */
-      .progress-next {
-        font-size: 0.75rem;
-        white-space: normal;
-        word-break: break-word;
-      }
-
-      /* milestone rows — tighter */
-      .ms-row {
-        padding: 10px 10px;
-        gap: 8px;
-      }
-
-      .ms-title {
-        font-size: 0.82rem;
-      }
-
-      .ms-desc {
-        font-size: 0.7rem;
-      }
-
-      .ms-count {
-        font-size: 0.75rem;
-        min-width: 32px;
-        text-align: right;
-      }
-
-      .ms-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 0.9rem;
-        flex-shrink: 0;
-      }
-
-      /* referral link box — stack on mobile */
-      .ref-link-row {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .ref-link-display {
-        font-size: 0.72rem;
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .copy-btn {
-        width: 100%;
-        text-align: center;
-        padding: 12px;
-      }
-
-      /* share buttons — smaller text */
-      .share-btn {
-        font-size: 0.75rem;
-        padding: 10px 4px;
-        gap: 3px;
-      }
-
-      /* choice buttons */
-      .choice-btn {
-        font-size: 0.88rem;
-        padding: 12px 14px;
-      }
-
-      /* primary button */
-      .btn-primary {
-        font-size: 0.92rem;
-        padding: 14px;
-      }
-
-      /* email input */
-      .email-input {
-        font-size: 0.92rem;
-        padding: 13px 14px;
-      }
-
-      /* toast wraps on small screens */
-      .toast {
-        white-space: normal;
-        text-align: center;
-        width: 90%;
-        font-size: 0.8rem;
-        padding: 10px 16px;
-      }
-
-      /* moved up badge */
-      .moved-up-badge {
-        font-size: 0.72rem;
-        padding: 5px 12px;
-      }
-
-      /* milestones section label */
-      .milestones {
-        gap: 8px;
-      }
-
-      /* bottom note */
-      .card p[style] {
-        font-size: 0.72rem !important;
-      }
-
-      /* turnstile captcha centering */
-      .cf-turnstile {
-        display: flex;
-        justify-content: center;
-      }
-
+      body { padding: 16px 12px; align-items: flex-start; }
+      .screen { padding: 24px 18px 20px; }
+      h1 { font-size: 1.45rem; }
+      .position-number { font-size: 3.5rem; }
+      .section-block { padding: 16px 18px; }
+      .ref-link-wrap, .share-wrap { padding: 14px 18px; }
+      .ref-link-box { flex-direction: column; }
+      .copy-btn { width: 100%; text-align: center; }
+      .share-btn { font-size: 0.72rem; }
+      .foot-note { padding: 0 18px 14px; }
     }
 
-    /* extra small — like 360px Android phones */
     @media (max-width: 380px) {
-
-      .pos-number {
-        font-size: 2.2rem;
-      }
-
-      h1 {
-        font-size: 1.2rem;
-      }
-
-      .share-btn {
-        font-size: 0.68rem;
-        padding: 9px 3px;
-      }
-
-      .ms-title {
-        font-size: 0.78rem;
-      }
-
-      .ref-link-display {
-        font-size: 0.65rem;
-      }
-
+      .position-number { font-size: 2.8rem; }
+      h1 { font-size: 1.25rem; }
+      .share-btn { font-size: 0.65rem; gap: 3px; }
     }
-
   </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="card">
-
-  <!-- ======= WELCOME ======= -->
-  <div class="screen active" id="s-welcome">
-    <div class="brand">PhiPrep · Early Access</div>
-    <h1>Stop getting answers.<br/>Start thinking.</h1>
-    <p class="subtitle">Most AI tools dump solutions. PhiPrep teaches you <strong style="color:#dceadc;">how to think</strong> through JEE problems — step by step.</p>
-    <div class="bullet-list">
-      <div class="bullet-item">Brain Mode → learn concepts step-by-step</div>
-      <div class="bullet-item">SOS Mode → instant full solution when stuck</div>
-      <div class="bullet-item">AI mistake detection on your solving steps</div>
-      <div class="bullet-item">Math keyboard + scientific calculator built-in</div>
-    </div>
-    <button class="btn-primary" onclick="go('s-email')">Join the Waitlist →</button>
-    <p style="font-size:0.71rem; color:#3d5c42; text-align:center; margin-top:14px;">Free. No spam. Unsubscribe anytime.</p>
+  <div class="top-brand">
+    <div class="logo">Phi<span>Prep</span></div>
+    <div class="tagline">Early Access Waitlist</div>
   </div>
 
-  <!-- ======= EMAIL ======= -->
-  <div class="screen" id="s-email">
-    <div class="brand">PhiPrep · Early Access</div>
-    <div class="step-bar">
-      <div class="step-dot active"></div>
-      <div class="step-dot"></div>
-      <div class="step-dot"></div>
-    </div>
-    <div class="q-label">Step 1 of 3</div>
-    <div class="q-title">What's your email address?</div>
-    <input class="email-input" type="email" id="emailInput" placeholder="you@example.com" oninput="clearErr()"/>
-    <div class="input-error" id="emailErr"></div>
-    <button class="btn-primary" onclick="doEmail()">Continue →</button>
-  </div>
+  <div class="card">
 
-  <!-- ======= EXAM ======= -->
-  <div class="screen" id="s-exam">
-    <div class="brand">PhiPrep · Early Access</div>
-    <div class="step-bar">
-      <div class="step-dot done"></div>
-      <div class="step-dot active"></div>
-      <div class="step-dot"></div>
-    </div>
-    <div class="q-label">Step 2 of 3</div>
-    <div class="q-title">What exam are you preparing for?</div>
-    <div class="choices" id="examList">
-      <button class="choice-btn" onclick="pick('exam', this)">JEE Main</button>
-      <button class="choice-btn" onclick="pick('exam', this)">JEE Advanced</button>
-      <button class="choice-btn" onclick="pick('exam', this)">NEET</button>
-      <button class="choice-btn" onclick="pick('exam', this)">Class 11/12 Boards</button>
-      <button class="choice-btn" onclick="pick('exam', this)">Other</button>
-    </div>
-    <button class="btn-primary" onclick="doExam()">Continue →</button>
-  </div>
-
-  <!-- ======= FINAL QUESTIONS ======= -->
-  <div class="screen" id="s-final">
-    <div class="brand">PhiPrep · Early Access</div>
-    <div class="step-bar">
-      <div class="step-dot done"></div>
-      <div class="step-dot done"></div>
-      <div class="step-dot active"></div>
-    </div>
-    <div class="q-label">Step 3 of 3</div>
-    <div class="q-title">Do you use AI like ChatGPT for studying?</div>
-    <div class="choices" id="aiList" style="margin-bottom:22px;">
-      <button class="choice-btn" onclick="pick('ai', this)">Yes, regularly</button>
-      <button class="choice-btn" onclick="pick('ai', this)">Sometimes</button>
-      <button class="choice-btn" onclick="pick('ai', this)">Rarely</button>
-      <button class="choice-btn" onclick="pick('ai', this)">Never</button>
-    </div>
-    <div class="q-title" style="font-size:0.95rem; margin-bottom:14px;">Biggest problem with AI study tools?</div>
-    <div class="choices" id="problemList">
-      <button class="choice-btn" onclick="pick('prob', this)">Wrong steps</button>
-      <button class="choice-btn" onclick="pick('prob', this)">Just dumps answers</button>
-      <button class="choice-btn" onclick="pick('prob', this)">Bad explanations</button>
-      <button class="choice-btn" onclick="pick('prob', this)">Can't detect my mistake</button>
-      <button class="choice-btn" onclick="pick('prob', this)">Not useful for JEE</button>
-    </div>
-    <div class="cf-turnstile" data-sitekey="0x4AAAAAACuv8_Yk78-b5UUC" data-theme="dark" style="margin-top:22px; margin-bottom:12px;"></div>
-    <button class="btn-primary" onclick="doFinal()">Join the Waitlist →</button>
-    <button class="btn-skip" onclick="doFinal()">Skip and join</button>
-  </div>
-
-  <!-- ======= SUCCESS DASHBOARD ======= -->
-  <div class="screen" id="s-success">
-
-    <div class="brand">PhiPrep · You're in 🎉</div>
-
-    <!-- THE ROBINHOOD PART — big position number -->
-    <div class="position-card">
-      <div class="pos-label">Your position in line</div>
-      <div class="pos-number" id="posNum">#—</div>
-      <div class="pos-total">out of <span id="totalNum">—</span> people waiting</div>
-      <div class="moved-up-badge" id="movedBadge">↑ moved up <span id="movedNum">0</span> spots from referrals</div>
-    </div>
-
-    <!-- referral count progress -->
-    <div class="ref-row">
-      <span class="ref-row-label">Your referrals</span>
-      <span class="ref-row-num"><span id="refNum">0</span> / 10</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="refBar" style="width:0%"></div>
-    </div>
-    <div class="progress-next" id="progressHint">1 referral = 10 spots ahead →</div>
-
-    <div class="divider"></div>
-
-    <!-- milestones -->
-    <div style="font-family:'Syne',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#3d5c42; margin-bottom:10px;">Unlock rewards</div>
-
-    <div class="milestones">
-      <div class="ms-row" id="m1">
-        <div class="ms-icon">⚡</div>
-        <div class="ms-text">
-          <div class="ms-title">Skip 10 spots</div>
-          <div class="ms-desc">1 referral = 10 spots ahead</div>
-        </div>
-        <div class="ms-count" id="mc1">0 / 1</div>
+    <!-- WELCOME -->
+    <div class="screen active" id="s-welcome">
+      <h1>Stop getting answers.<br/>Start <span>thinking.</span></h1>
+      <p class="subtitle">Most AI tools just dump solutions. PhiPrep teaches you how to actually think through JEE problems — step by step.</p>
+      <div class="feature-list">
+        <div class="feature-item">Brain Mode — learn concepts step by step</div>
+        <div class="feature-item">SOS Mode — full solution when you're stuck</div>
+        <div class="feature-item">AI detects mistakes in your reasoning</div>
+        <div class="feature-item">Math keyboard + scientific calculator built in</div>
       </div>
-      <div class="ms-row" id="m2">
-        <div class="ms-icon">🔑</div>
-        <div class="ms-text">
-          <div class="ms-title">Beta invite</div>
-          <div class="ms-desc">Early access before public launch</div>
-        </div>
-        <div class="ms-count" id="mc2">0 / 5</div>
+      <button class="btn-primary" onclick="go('s-email')">Join the Waitlist →</button>
+      <p style="font-size:0.75rem; color:var(--light); text-align:center; margin-top:12px;">Free to join. No spam. Ever.</p>
+    </div>
+
+    <!-- EMAIL -->
+    <div class="screen" id="s-email">
+      <div class="step-bar">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
       </div>
-      <div class="ms-row" id="m3">
-        <div class="ms-icon">👑</div>
-        <div class="ms-text">
-          <div class="ms-title">3 months free Pro</div>
-          <div class="ms-desc">Full premium, no payment needed</div>
-        </div>
-        <div class="ms-count" id="mc3">0 / 10</div>
+      <div class="q-label">Step 1 of 3</div>
+      <div class="q-title">What's your email address?</div>
+      <input class="email-input" type="email" id="emailInput" placeholder="you@example.com" oninput="clearErr()"/>
+      <div class="input-error" id="emailErr"></div>
+      <button class="btn-primary" onclick="doEmail()">Continue →</button>
+    </div>
+
+    <!-- EXAM -->
+    <div class="screen" id="s-exam">
+      <div class="step-bar">
+        <div class="step-dot done"></div>
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
       </div>
+      <div class="q-label">Step 2 of 3</div>
+      <div class="q-title">What exam are you preparing for?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="pick('exam',this)">JEE Main</button>
+        <button class="choice-btn" onclick="pick('exam',this)">JEE Advanced</button>
+        <button class="choice-btn" onclick="pick('exam',this)">NEET</button>
+        <button class="choice-btn" onclick="pick('exam',this)">Class 11/12 Boards</button>
+        <button class="choice-btn" onclick="pick('exam',this)">Other</button>
+      </div>
+      <button class="btn-primary" onclick="doExam()">Continue →</button>
     </div>
 
-    <div class="divider"></div>
-
-    <!-- referral link -->
-    <div style="font-family:'Syne',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#3d5c42; margin-bottom:8px;">Your referral link</div>
-    <div class="ref-link-row">
-      <div class="ref-link-display" id="refLinkText">phiprep.app/ref/—</div>
-      <button class="copy-btn" id="copyBtn" onclick="doCopy()">Copy</button>
+    <!-- FINAL -->
+    <div class="screen" id="s-final">
+      <div class="step-bar">
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot active"></div>
+      </div>
+      <div class="q-label">Step 3 of 3</div>
+      <div class="q-title">Do you use AI tools like ChatGPT for studying?</div>
+      <div class="choices" style="margin-bottom:20px;">
+        <button class="choice-btn" onclick="pick('ai',this)">Yes, regularly</button>
+        <button class="choice-btn" onclick="pick('ai',this)">Sometimes</button>
+        <button class="choice-btn" onclick="pick('ai',this)">Rarely</button>
+        <button class="choice-btn" onclick="pick('ai',this)">Never</button>
+      </div>
+      <div class="q-title" style="font-size:1rem; margin-bottom:12px;">Biggest problem with AI study tools?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="pick('prob',this)">Wrong steps</button>
+        <button class="choice-btn" onclick="pick('prob',this)">Just dumps answers</button>
+        <button class="choice-btn" onclick="pick('prob',this)">Bad explanations</button>
+        <button class="choice-btn" onclick="pick('prob',this)">Can't detect my mistake</button>
+        <button class="choice-btn" onclick="pick('prob',this)">Not useful for JEE</button>
+      </div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAACuv8_Yk78-b5UUC" data-theme="light"></div>
+      <button class="btn-primary" onclick="doFinal()">Join the Waitlist →</button>
+      <button class="btn-skip" onclick="doFinalSkip()">Skip and join</button>
     </div>
 
-    <!-- share buttons -->
-    <div class="share-row">
-      <button class="share-btn" onclick="doWhatsapp()">💬 WhatsApp</button>
-      <button class="share-btn" onclick="doTwitter()">🐦 Twitter</button>
-      <button class="share-btn" onclick="doTelegram()">✈️ Telegram</button>
-    </div>
+    <!-- SUCCESS -->
+    <div class="screen" id="s-success">
 
-    <p style="font-size:0.7rem; color:#3d5c42; text-align:center; margin-top:14px;">Every signup using your link = 10 spots ahead for you.</p>
+      <div class="success-header">
+        <div class="success-label">You're on the list ✓</div>
+        <div class="position-number" id="posNum">#—</div>
+        <div class="position-sub">out of <span id="totalNum">—</span> people waiting</div>
+        <div class="moved-badge" id="movedBadge">↑ moved up <span id="movedNum">0</span> spots</div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Your referrals</div>
+        <div class="ref-count-row">
+          <span class="ref-count-label">People joined using your link</span>
+          <span class="ref-count-num"><span id="refNum">0</span> / 10</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="refBar" style="width:0%"></div>
+        </div>
+        <div class="progress-hint" id="progressHint">1 referral = 10 spots ahead</div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-title">Rewards</div>
+        <div class="milestone-list">
+          <div class="ms-item" id="m1">
+            <div class="ms-num">1</div>
+            <div class="ms-info">
+              <div class="ms-name">Skip 10 spots</div>
+              <div class="ms-desc">Jump ahead instantly</div>
+            </div>
+            <div class="ms-count" id="mc1">0 / 1</div>
+          </div>
+          <div class="ms-item" id="m2">
+            <div class="ms-num">5</div>
+            <div class="ms-info">
+              <div class="ms-name">Beta invite</div>
+              <div class="ms-desc">Access before public launch</div>
+            </div>
+            <div class="ms-count" id="mc2">0 / 5</div>
+          </div>
+          <div class="ms-item" id="m3">
+            <div class="ms-num">10</div>
+            <div class="ms-info">
+              <div class="ms-name">3 months free Pro</div>
+              <div class="ms-desc">Full premium, no payment</div>
+            </div>
+            <div class="ms-count" id="mc3">0 / 10</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-link-wrap">
+        <div class="section-title" style="margin-bottom:10px;">Your referral link</div>
+        <div class="ref-link-box">
+          <div class="ref-link-text" id="refLinkText">loading...</div>
+          <button class="copy-btn" id="copyBtn" onclick="doCopy()">Copy</button>
+        </div>
+      </div>
+
+      <div class="share-wrap">
+        <div class="share-row">
+          <button class="share-btn" onclick="doWhatsapp()">💬 WhatsApp</button>
+          <button class="share-btn" onclick="doTwitter()">🐦 Twitter</button>
+          <button class="share-btn" onclick="doTelegram()">✈️ Telegram</button>
+        </div>
+      </div>
+
+      <p class="foot-note">Every signup using your link = 10 spots ahead for you.</p>
+
+    </div>
 
   </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+  var user = { email:'', exam:'', ai:'', prob:'', position:0, total:0, refs:0, movedUp:0, code:'' };
+  var picked = { exam:null, ai:null, prob:null };
+  var dashboardRendered = false;
 
-  // state
-  var user = {
-    email: '',
-    exam: '',
-    ai: '',
-    prob: '',
-    position: 0,
-    total: 0,
-    refs: 0,
-    movedUp: 0,
-    code: ''
-  };
-
-  var picked = { exam: null, ai: null, prob: null };
-
-  // supabase config
   var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
   var SB_KEY = 'sb_publishable_KktwxQw0naHLSEU0lFpmTA_ElBTdFJ1';
 
   function sbHeaders() {
-    return {
-      'Content-Type': 'application/json',
-      'apikey': SB_KEY,
-      'Authorization': 'Bearer ' + SB_KEY
-    };
+    return { 'Content-Type':'application/json', 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY };
   }
-
-  // insert a new row into waitlist table
   function sbInsert(data) {
-    return fetch(SB_URL + '/rest/v1/waitlist', {
-      method: 'POST',
-      headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=minimal' }),
-      body: JSON.stringify(data)
-    });
+    return fetch(SB_URL+'/rest/v1/waitlist', { method:'POST', headers:Object.assign({},sbHeaders(),{'Prefer':'return=minimal'}), body:JSON.stringify(data) });
   }
-
-  // get a user row by their referral code
   function sbGetByCode(code) {
-    return fetch(SB_URL + '/rest/v1/waitlist?code=eq.' + code + '&select=*', {
-      method: 'GET',
-      headers: sbHeaders()
-    }).then(function(r) { return r.json(); });
+    return fetch(SB_URL+'/rest/v1/waitlist?code=eq.'+code+'&select=*', { method:'GET', headers:sbHeaders() }).then(function(r){return r.json();});
   }
-
-  // get a user row by their email
   function sbGetByEmail(email) {
-    return fetch(SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(email) + '&select=*', {
-      method: 'GET',
-      headers: sbHeaders()
-    }).then(function(r) { return r.json(); });
+    return fetch(SB_URL+'/rest/v1/waitlist?email=eq.'+encodeURIComponent(email)+'&select=*', { method:'GET', headers:sbHeaders() }).then(function(r){return r.json();});
   }
-
-  // update a row by code
   function sbUpdate(code, data) {
-    return fetch(SB_URL + '/rest/v1/waitlist?code=eq.' + code, {
-      method: 'PATCH',
-      headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=minimal' }),
-      body: JSON.stringify(data)
-    });
+    return fetch(SB_URL+'/rest/v1/waitlist?code=eq.'+code, { method:'PATCH', headers:Object.assign({},sbHeaders(),{'Prefer':'return=minimal'}), body:JSON.stringify(data) });
   }
 
-  // sanitize any string before using it — prevents XSS
   function sanitize(str) {
     if (typeof str !== 'string') return '';
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;');
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
   }
-
-  // safe localStorage get — never crash if data is corrupt
   function safeGetLocal(key) {
-    try {
-      var val = localStorage.getItem(key);
-      return val ? JSON.parse(val) : null;
-    } catch(e) {
-      localStorage.removeItem(key);
-      return null;
-    }
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { localStorage.removeItem(key); return null; }
   }
-
-  // safe localStorage set
   function safeSetLocal(key, val) {
-    try {
-      localStorage.setItem(key, JSON.stringify(val));
-    } catch(e) {
-      console.log('localStorage full or blocked');
-    }
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
   }
-
-  // validate referral code — only alphanumeric allowed
-  // prevents someone injecting code via ?ref= in url
   function isValidCode(code) {
     return typeof code === 'string' && /^[a-zA-Z0-9]{6,30}$/.test(code);
+  }
+  function getRefUrl() {
+    return window.location.origin + window.location.pathname + '?ref=' + user.code;
   }
 
   window.onload = function() {
@@ -1104,7 +812,6 @@
 
     if (saved && saved.email && saved.code) {
       user = saved;
-
       sbGetByEmail(user.email).then(function(rows) {
         if (rows && rows.length > 0) {
           var row = rows[0];
@@ -1114,58 +821,42 @@
           user.movedUp  = parseInt(row.moved_up) || 0;
           user.total    = parseInt(row.total)    || user.total;
           safeSetLocal('phiprep_v1', user);
-
-          if (user.refs > oldRefs) {
-            toast('↑ New referral! You moved up ' + (user.refs - oldRefs) * 10 + ' spots.');
-          }
+          if (user.refs > oldRefs) toast('↑ New referral! You moved up '+(user.refs-oldRefs)*10+' spots.');
         }
         renderDashboard();
-      }).catch(function() {
-        renderDashboard();
-      });
-
+      }).catch(function() { renderDashboard(); });
       go('s-success');
     } else {
-      // validate ref code before saving — block injection attempts
       if (refInUrl && isValidCode(refInUrl)) {
         var myCode = saved ? saved.code : null;
-        if (refInUrl !== myCode) {
-          localStorage.setItem('phi_ref', refInUrl);
-        }
+        if (refInUrl !== myCode) localStorage.setItem('phi_ref', refInUrl);
       }
     }
   };
 
   function go(id) {
-    document.querySelectorAll('.screen').forEach(function(s) {
-      s.classList.remove('active');
-    });
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
     document.getElementById(id).classList.add('active');
     window.scrollTo(0,0);
   }
 
-  // email step
   function doEmail() {
     var v = document.getElementById('emailInput').value.trim();
     if (!v) { document.getElementById('emailErr').textContent = 'Email is required.'; return; }
-    if (!v.includes('@') || !v.includes('.')) { document.getElementById('emailErr').textContent = 'Enter a valid email.'; return; }
-    user.email = v;
+    if (!v.includes('@')||!v.includes('.')) { document.getElementById('emailErr').textContent = 'Enter a valid email.'; return; }
+    user.email = v.toLowerCase();
     go('s-exam');
   }
-
   function clearErr() { document.getElementById('emailErr').textContent = ''; }
 
-  // enter key on email screen
   document.addEventListener('keydown', function(e) {
     if (e.key !== 'Enter') return;
     var active = document.querySelector('.screen.active');
     if (active && active.id === 's-email') doEmail();
   });
 
-  // choice picker
   function pick(group, btn) {
-    var parent = btn.parentElement;
-    parent.querySelectorAll('.choice-btn').forEach(function(b) { b.classList.remove('selected'); });
+    btn.parentElement.querySelectorAll('.choice-btn').forEach(function(b){b.classList.remove('selected');});
     btn.classList.add('selected');
     picked[group] = btn.textContent.trim();
   }
@@ -1177,49 +868,61 @@
   }
 
   function doFinal() {
-    // prevent double click
     var joinBtn = document.querySelector('#s-final .btn-primary');
     if (joinBtn.disabled) return;
 
-    // check captcha is completed
     var captcha = document.querySelector('[name="cf-turnstile-response"]');
-    if (!captcha || !captcha.value) {
-      toast('Please complete the captcha first');
-      return;
-    }
+    var token = captcha ? captcha.value : '';
 
-    user.ai = picked.ai || '';
-    user.prob = picked.prob || '';
+    if (!token) { toast('Please complete the captcha first'); return; }
 
-    // disable button and show loading
     joinBtn.disabled = true;
-    joinBtn.textContent = 'Joining...';
+    joinBtn.textContent = 'Verifying...';
 
-    signup(function(err) {
-      // re-enable if something went wrong
-      if (err) {
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join the Waitlist →';
+    fetch('/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        user.ai   = picked.ai   || '';
+        user.prob = picked.prob || '';
+        joinBtn.textContent = 'Joining...';
+        signup(function(err) {
+          if (err) { joinBtn.disabled=false; joinBtn.textContent='Join the Waitlist →'; }
+        });
+      } else {
+        toast('Captcha failed. Please try again.');
+        joinBtn.disabled=false;
+        joinBtn.textContent='Join the Waitlist →';
       }
+    })
+    .catch(function() {
+      toast('Connection error. Please try again.');
+      joinBtn.disabled=false;
+      joinBtn.textContent='Join the Waitlist →';
     });
   }
 
-
+  function doFinalSkip() {
+    user.ai   = picked.ai   || '';
+    user.prob = picked.prob || '';
+    signup(null);
+  }
 
   function signup(onError) {
     var referrerCode = localStorage.getItem('phi_ref');
-
-    // validate referrer code before using it
     if (referrerCode && !isValidCode(referrerCode)) {
       referrerCode = null;
       localStorage.removeItem('phi_ref');
     }
 
-    // sanitize all user inputs before sending to database
-    var safeEmail = user.email.toLowerCase().trim().slice(0, 200);
-    var safeExam  = sanitize(user.exam).slice(0, 50);
-    var safeAi    = sanitize(user.ai).slice(0, 50);
-    var safeProb  = sanitize(user.prob).slice(0, 100);
+    var safeEmail = user.email.toLowerCase().trim().slice(0,200);
+    var safeExam  = sanitize(user.exam).slice(0,50);
+    var safeAi    = sanitize(user.ai).slice(0,50);
+    var safeProb  = sanitize(user.prob).slice(0,100);
 
     sbGetByEmail(safeEmail).then(function(rows) {
       if (rows && rows.length > 0) {
@@ -1244,7 +947,7 @@
       user.refs     = 0;
       user.movedUp  = 0;
 
-      var clean = safeEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
+      var clean = safeEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g,'').slice(0,15);
       user.code = clean + Math.floor(Math.random() * 9000 + 1000);
 
       sbInsert({
@@ -1270,14 +973,13 @@
         if (referrerCode) {
           sbGetByCode(referrerCode).then(function(rows) {
             if (rows && rows.length > 0) {
-              var referrer = rows[0];
-              var newRefs  = (parseInt(referrer.refs) || 0) + 1;
-              var oldPos   = parseInt(referrer.position) || 1000;
-              var newPos   = Math.max(1, oldPos - 10);
+              var ref     = rows[0];
+              var newRefs = (parseInt(ref.refs) || 0) + 1;
+              var newPos  = Math.max(1, (parseInt(ref.position) || 1000) - 10);
               sbUpdate(referrerCode, {
                 refs:     newRefs,
                 position: newPos,
-                moved_up: (parseInt(referrer.moved_up) || 0) + 10
+                moved_up: (parseInt(ref.moved_up) || 0) + 10
               });
             }
           });
@@ -1288,8 +990,7 @@
         renderDashboard();
         go('s-success');
 
-      }).catch(function(err) {
-        console.log('supabase insert error:', err);
+      }).catch(function() {
         toast('Connection error. Please try again.');
         if (onError) onError(true);
       });
@@ -1301,48 +1002,37 @@
   }
 
   function saveToSheets(u, referredBy) {
-    // rate limit — only one submission per 60 seconds from same browser
     var lastSubmit = localStorage.getItem('phi_last_submit');
     var now = Date.now();
-    if (lastSubmit && (now - parseInt(lastSubmit)) < 60000) {
-      console.log('rate limited');
-      return;
-    }
+    if (lastSubmit && (now - parseInt(lastSubmit)) < 60000) return;
     localStorage.setItem('phi_last_submit', now);
 
-    var SHEET_URL = 'https://script.google.com/macros/s/AKfycbzh230pqnOuXrTJWb7hUf9vMlH_RsWvH6ayG_GbSuS-fXcNJ8rTHcWMgiNx0H2MkAK3/exec';
-
-    var payload = {
-      token:      'phiprep_secret_2024',
-      email:      u.email,
-      exam:       u.exam,
-      ai:         u.ai,
-      problem:    u.prob,
-      position:   u.position,
-      code:       u.code,
-      referredBy: referredBy || 'direct'
-    };
-
-    fetch(SHEET_URL, {
+    fetch('https://script.google.com/macros/s/AKfycbzh230pqnOuXrTJWb7hUf9vMlH_RsWvH6ayG_GbSuS-fXcNJ8rTHcWMgiNx0H2MkAK3/exec', {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(function(err) {
-      console.log('sheet error:', err);
-    });
+      body: JSON.stringify({
+        token:      'phiprep_secret_2024',
+        email:      u.email,
+        exam:       u.exam,
+        ai:         u.ai,
+        problem:    u.prob,
+        position:   u.position,
+        code:       u.code,
+        referredBy: referredBy || 'direct'
+      })
+    }).catch(function(e){ console.log('sheets error:',e); });
   }
 
-  var dashboardRendered = false;
+  var dashRendered = false;
 
   function renderDashboard() {
     document.getElementById('totalNum').textContent = user.total.toLocaleString();
     document.getElementById('refLinkText').textContent = getRefUrl();
 
-    // only animate countDown once — not on every refresh call
-    if (!dashboardRendered) {
-      countDown('posNum', user.position + 400, user.position, '#', 1100);
-      dashboardRendered = true;
+    if (!dashRendered) {
+      countDown('posNum', user.position + 400, user.position, '#', 1000);
+      dashRendered = true;
     } else {
       document.getElementById('posNum').textContent = '#' + user.position.toLocaleString();
     }
@@ -1352,15 +1042,13 @@
     if (user.movedUp > 0) {
       document.getElementById('movedNum').textContent = user.movedUp;
       document.getElementById('movedBadge').classList.add('visible');
-      document.getElementById('posNum').classList.add('jumped');
+      document.getElementById('posNum').classList.add('moved');
     }
   }
 
-  // the counting animation
   function countDown(elId, from, to, prefix, ms) {
     var el = document.getElementById(elId);
     var start = null;
-
     function frame(ts) {
       if (!start) start = ts;
       var p = Math.min((ts - start) / ms, 1);
@@ -1370,97 +1058,66 @@
       if (p < 1) requestAnimationFrame(frame);
       else el.textContent = prefix + to.toLocaleString();
     }
-
     requestAnimationFrame(frame);
   }
 
   function updateMilestones(refs) {
     document.getElementById('refNum').textContent = refs;
+    document.getElementById('refBar').style.width = Math.min((refs/10)*100, 100) + '%';
 
-    // progress bar goes to 10 total
-    var pct = Math.min((refs / 10) * 100, 100);
-    document.getElementById('refBar').style.width = pct + '%';
-
-    // hint text
     var hint = '';
-    if      (refs < 1)  hint = '1 referral = 10 spots ahead →';
-    else if (refs < 5)  hint = 'Refer ' + (5 - refs) + ' more for beta access →';
-    else if (refs < 10) hint = 'Refer ' + (10 - refs) + ' more for 3 months free Pro →';
-    else                hint = '🎉 All milestones unlocked!';
+    if      (refs < 1)  hint = '1 referral = 10 spots ahead';
+    else if (refs < 5)  hint = (5-refs) + ' more for beta access';
+    else if (refs < 10) hint = (10-refs) + ' more for 3 months free Pro';
+    else                hint = 'All rewards unlocked!';
     document.getElementById('progressHint').textContent = hint;
 
-    // milestone counts — each has its own threshold
-    document.getElementById('mc1').textContent = Math.min(refs, 1)  + ' / 1';
-    document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
-    document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
+    document.getElementById('mc1').textContent = Math.min(refs,1)  + ' / 1';
+    document.getElementById('mc2').textContent = Math.min(refs,5)  + ' / 5';
+    document.getElementById('mc3').textContent = Math.min(refs,10) + ' / 10';
 
-    // unlock milestones independently
     if (refs >= 1)  document.getElementById('m1').classList.add('done');
     if (refs >= 5)  document.getElementById('m2').classList.add('done');
     if (refs >= 10) document.getElementById('m3').classList.add('done');
-
-    // make sure higher milestones dont unlock early
-    if (refs < 5)  document.getElementById('m2').classList.remove('done');
-    if (refs < 10) document.getElementById('m3').classList.remove('done');
-  }
-
-  function getRefUrl() {
-    // strip all query params from current url first then add ref
-    var base = window.location.origin + window.location.pathname;
-    return base + '?ref=' + user.code;
+    if (refs < 5)   document.getElementById('m2').classList.remove('done');
+    if (refs < 10)  document.getElementById('m3').classList.remove('done');
   }
 
   function doCopy() {
     var url = getRefUrl();
-
-    // works on file://, http://, anywhere — no HTTPS needed
     var temp = document.createElement('textarea');
     temp.value = url;
-    temp.style.position = 'fixed';
-    temp.style.top = '0';
-    temp.style.left = '0';
-    temp.style.opacity = '0';
+    temp.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
     document.body.appendChild(temp);
-    temp.focus();
-    temp.select();
+    temp.focus(); temp.select();
     document.execCommand('copy');
     document.body.removeChild(temp);
-
     var btn = document.getElementById('copyBtn');
     btn.textContent = 'Copied!';
     btn.classList.add('done');
-    setTimeout(function() {
-      btn.textContent = 'Copy';
-      btn.classList.remove('done');
-    }, 2200);
-
-    toast('Link copied! Share it with your friends preparing for JEE.');
+    setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('done'); }, 2000);
+    toast('Link copied! Share it with your friends.');
   }
 
   function doWhatsapp() {
     var url = getRefUrl();
-    var msg = 'Just joined PhiPrep — an AI tutor that actually teaches you HOW to think through JEE problems, not just dump answers. Join here: ' + url;
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    window.open('https://wa.me/?text='+encodeURIComponent('I joined the PhiPrep waitlist — an AI tutor that teaches you HOW to think through JEE problems. Join here: '+url),'_blank');
   }
-
   function doTwitter() {
     var url = getRefUrl();
-    var msg = 'Joined @PhiPrep waitlist — AI tutor built for serious JEE prep. Teaches thinking, not just answers. ' + url;
-    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg), '_blank');
+    window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('Just joined @PhiPrep — AI tutor for serious JEE prep. Teaches thinking, not just answers. '+url),'_blank');
   }
-
   function doTelegram() {
     var url = getRefUrl();
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Join the PhiPrep waitlist for JEE prep AI'), '_blank');
+    window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent('Join PhiPrep waitlist for JEE prep'),'_blank');
   }
 
   function toast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(function() { t.classList.remove('show'); }, 3200);
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
   }
-
 </script>
 </body>
 </html>
