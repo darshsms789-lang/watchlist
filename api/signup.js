@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
-    return res.status(405).end();
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -10,14 +10,20 @@ export default async function handler(req, res) {
     const SB_KEY = process.env.SUPABASE_KEY;
 
     const body = req.body;
+    const email = body.email;
+    const referredBy = body.referred_by || null;
 
-    // 1️⃣ check if email already exists
+    if (!email) {
+      return res.status(400).json({ error: "Email required" });
+    }
+
+    // check if email already exists
     const check = await fetch(
-      SB_URL + "/rest/v1/waitlist?email=eq." + encodeURIComponent(body.email) + "&select=*",
+      `${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}&select=*`,
       {
         headers: {
           apikey: SB_KEY,
-          Authorization: "Bearer " + SB_KEY
+          Authorization: `Bearer ${SB_KEY}`
         }
       }
     );
@@ -31,73 +37,79 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2️⃣ count total users to generate index
-    const countRes = await fetch(
-      SB_URL + "/rest/v1/waitlist?select=id",
-      {
-        headers: {
-          apikey: SB_KEY,
-          Authorization: "Bearer " + SB_KEY
-        }
-      }
-    );
+    // STEP 1 — decrease points of everyone by 1
+    await fetch(`${SB_URL}/rest/v1/waitlist`, {
+      method: "PATCH",
+      headers: {
+        apikey: SB_KEY,
+        Authorization: `Bearer ${SB_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        points: "points-1"
+      })
+    });
 
-    const users = await countRes.json();
+    // STEP 2 — generate random points (500–1000)
+    const points = Math.floor(Math.random() * (1000 - 500 + 1)) + 500;
 
-    const index = users.length + 1;
+    // STEP 3 — generate referral code
+    const code = Math.random().toString(36).substring(2, 8);
 
-    // 3️⃣ fake waitlist position logic (your friend's idea)
-    let position;
+    const newUser = {
+      email: email,
+      points: points,
+      refs: 0,
+      code: code,
+      referred_by: referredBy
+    };
 
-    if (index < 100) {
-      position = index;
-    } 
-    else if (index < 2000) {
-      position = index * 100 * 10;
-    } 
-    else {
-      position = index * 100;
-    }
-
-    // 4️⃣ insert new user
-    const insert = await fetch(SB_URL + "/rest/v1/waitlist", {
+    // STEP 4 — insert new user
+    const insert = await fetch(`${SB_URL}/rest/v1/waitlist`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         apikey: SB_KEY,
-        Authorization: "Bearer " + SB_KEY,
+        Authorization: `Bearer ${SB_KEY}`,
         Prefer: "return=representation"
       },
-      body: JSON.stringify({
-        ...body,
-        position: position
-      })
+      body: JSON.stringify(newUser)
     });
 
     const data = await insert.json();
 
-    if (insert.ok) {
+    // STEP 5 — referral bonus
+    if (referredBy) {
 
-      return res.status(200).json({
-        status: "success",
-        position: position,
-        data: data[0]
-      });
-
-    } else {
-
-      return res.status(500).json({
-        status: "error"
-      });
+      await fetch(
+        `${SB_URL}/rest/v1/waitlist?code=eq.${referredBy}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: SB_KEY,
+            Authorization: `Bearer ${SB_KEY}`
+          },
+          body: JSON.stringify({
+            refs: "refs+1",
+            points: "points+10"
+          })
+        }
+      );
 
     }
+
+    return res.status(200).json({
+      status: "success",
+      user: data[0]
+    });
 
   } catch (error) {
 
     console.error(error);
 
     return res.status(500).json({
-      error: "Server error"
+      status: "error"
     });
 
   }
