@@ -1,25 +1,23 @@
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
-    return res.status(405).end();
-  }
-
-  const SB_URL = "https://zuidgbvnyonyxzfsepox.supabase.co";
-  const SB_KEY = process.env.SUPABASE_KEY;
-
-  const body = req.body;
-  const email = body.email;
-  const ref = body.referred_by;
-
-  if (!email) {
-    return res.status(400).json({ error: "Email required" });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
 
-    // check existing email
+    const SB_URL = "https://zuidgbvnyonyxzfsepox.supabase.co";
+    const SB_KEY = process.env.SUPABASE_KEY;
+
+    const body = req.body;
+
+    if (!body.email) {
+      return res.status(400).json({ error: "Email required" });
+    }
+
+    // check if user exists
     const check = await fetch(
-      `${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}&select=*`,
+      `${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(body.email)}&select=*`,
       {
         headers: {
           apikey: SB_KEY,
@@ -38,7 +36,7 @@ export default async function handler(req, res) {
     }
 
     // get total users
-    const totalRes = await fetch(
+    const countRes = await fetch(
       `${SB_URL}/rest/v1/waitlist?select=id`,
       {
         headers: {
@@ -48,33 +46,38 @@ export default async function handler(req, res) {
       }
     );
 
-    const totalUsers = await totalRes.json();
-    const position = totalUsers.length + 1;
+    const users = await countRes.json();
+
+    const position = users.length + 1000;
+
+    const newUser = {
+      ...body,
+      position: position,
+      refs: 0
+    };
 
     // insert user
-    const insert = await fetch(`${SB_URL}/rest/v1/waitlist`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SB_KEY,
-        Authorization: `Bearer ${SB_KEY}`,
-        Prefer: "return=minimal"
-      },
-      body: JSON.stringify({
-        ...body,
-        position: position
-      })
-    });
+    const insert = await fetch(
+      `${SB_URL}/rest/v1/waitlist`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SB_KEY,
+          Authorization: `Bearer ${SB_KEY}`,
+          Prefer: "return=representation"
+        },
+        body: JSON.stringify(newUser)
+      }
+    );
 
-    if (!insert.ok) {
-      return res.status(500).json({ error: "Insert failed" });
-    }
+    const inserted = await insert.json();
 
-    // referral logic
-    if (ref) {
+    // handle referral
+    if (body.referred_by) {
 
-      const refRes = await fetch(
-        `${SB_URL}/rest/v1/waitlist?code=eq.${ref}&select=*`,
+      const refCheck = await fetch(
+        `${SB_URL}/rest/v1/waitlist?code=eq.${body.referred_by}&select=*`,
         {
           headers: {
             apikey: SB_KEY,
@@ -83,30 +86,13 @@ export default async function handler(req, res) {
         }
       );
 
-      const refUser = await refRes.json();
+      const refUser = await refCheck.json();
 
       if (refUser.length > 0) {
 
-        const currentPos = refUser[0].position;
-        const newPos = Math.max(1, currentPos - 10);
+        const updatedRefs = refUser[0].refs + 1;
+        const updatedPosition = refUser[0].position - 10;
 
-        // shift users down
-        await fetch(
-          `${SB_URL}/rest/v1/waitlist?position=gte.${newPos}&position=lt.${currentPos}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              apikey: SB_KEY,
-              Authorization: `Bearer ${SB_KEY}`
-            },
-            body: JSON.stringify({
-              position: currentPos + 1
-            })
-          }
-        );
-
-        // update referrer
         await fetch(
           `${SB_URL}/rest/v1/waitlist?id=eq.${refUser[0].id}`,
           {
@@ -117,7 +103,8 @@ export default async function handler(req, res) {
               Authorization: `Bearer ${SB_KEY}`
             },
             body: JSON.stringify({
-              position: newPos
+              refs: updatedRefs,
+              position: updatedPosition
             })
           }
         );
@@ -127,7 +114,8 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json({
-      status: "success"
+      status: "success",
+      data: inserted[0]
     });
 
   } catch (error) {
