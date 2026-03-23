@@ -1,3 +1,6 @@
+
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,7 +45,6 @@
       padding: 32px 20px;
     }
 
-    /* subtle paper texture */
     body::before {
       content: '';
       position: fixed;
@@ -59,7 +61,6 @@
       z-index: 1;
     }
 
-    /* top brand */
     .top-brand {
       text-align: center;
       margin-bottom: 28px;
@@ -73,9 +74,7 @@
       letter-spacing: -0.01em;
     }
 
-    .top-brand .logo span {
-      color: var(--accent);
-    }
+    .top-brand .logo span { color: var(--accent); }
 
     .top-brand .tagline {
       font-size: 0.8rem;
@@ -85,7 +84,6 @@
       text-transform: uppercase;
     }
 
-    /* card */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -106,7 +104,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* step bar */
     .step-bar {
       display: flex;
       gap: 4px;
@@ -124,7 +121,6 @@
     .step-dot.done { background: var(--accent); }
     .step-dot.active { background: #7ab595; }
 
-    /* headings */
     h1 {
       font-family: 'Playfair Display', serif;
       font-size: 1.75rem;
@@ -144,7 +140,6 @@
       margin-bottom: 24px;
     }
 
-    /* bullet list */
     .feature-list {
       display: flex;
       flex-direction: column;
@@ -170,10 +165,8 @@
       color: var(--accent);
       font-weight: 600;
       flex-shrink: 0;
-      margin-top: 0px;
     }
 
-    /* question label */
     .q-label {
       font-size: 0.7rem;
       font-weight: 600;
@@ -192,7 +185,6 @@
       margin-bottom: 20px;
     }
 
-    /* email input */
     .email-input {
       width: 100%;
       background: #fafaf9;
@@ -217,7 +209,6 @@
       margin-bottom: 12px;
     }
 
-    /* choices */
     .choices {
       display: flex;
       flex-direction: column;
@@ -269,7 +260,6 @@
       border-color: var(--accent);
     }
 
-    /* buttons */
     .btn-primary {
       width: 100%;
       padding: 13px;
@@ -303,15 +293,6 @@
     }
 
     .btn-skip:hover { color: var(--muted); }
-
-    /* divider */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 20px 0;
-    }
-
-    /* SUCCESS DASHBOARD */
 
     .success-header {
       text-align: center;
@@ -360,7 +341,6 @@
 
     .moved-badge.visible { display: block; }
 
-    /* referral progress */
     .section-block {
       padding: 20px 24px;
       border-bottom: 1px solid var(--border);
@@ -383,6 +363,7 @@
     }
 
     .ref-count-label { font-size: 0.875rem; color: var(--muted); }
+
     .ref-count-num {
       font-size: 0.875rem;
       font-weight: 600;
@@ -410,7 +391,6 @@
       text-align: right;
     }
 
-    /* milestones */
     .milestone-list {
       display: flex;
       flex-direction: column;
@@ -468,7 +448,6 @@
 
     .ms-item.done .ms-count { color: var(--accent); }
 
-    /* referral link */
     .ref-link-wrap {
       padding: 20px 24px;
       border-bottom: 1px solid var(--border);
@@ -510,10 +489,7 @@
     .copy-btn:hover { background: #333; }
     .copy-btn.done { background: var(--accent); }
 
-    /* share buttons */
-    .share-wrap {
-      padding: 16px 24px 20px;
-    }
+    .share-wrap { padding: 16px 24px 20px; }
 
     .share-row {
       display: flex;
@@ -551,7 +527,6 @@
       padding: 0 24px 16px;
     }
 
-    /* toast */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -576,12 +551,8 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* turnstile */
-    .cf-turnstile {
-      margin: 16px 0 12px;
-    }
+    .cf-turnstile { margin: 16px 0 12px; }
 
-    /* mobile */
     @media (max-width: 520px) {
       body { padding: 16px 12px; align-items: flex-start; }
       .screen { padding: 24px 18px 20px; }
@@ -689,7 +660,6 @@
 
     <!-- SUCCESS -->
     <div class="screen" id="s-success">
-
       <div class="success-header">
         <div class="success-label">You're on the list ✓</div>
         <div class="position-number" id="posNum">#—</div>
@@ -756,7 +726,6 @@
       </div>
 
       <p class="foot-note">Every signup using your link = 10 spots ahead for you.</p>
-
     </div>
 
   </div>
@@ -768,15 +737,11 @@
   var user = { email:'', exam:'', ai:'', prob:'', position:0, total:0, refs:0, movedUp:0, code:'' };
   var picked = { exam:null, ai:null, prob:null };
   var dashRendered = false;
-  var signupInProgress = false; // bug fix: prevent double submit
+  var signupInProgress = false;
 
-  // ── SECURITY HELPERS ──────────────────────────────────────────
   function sanitize(str) {
     if (typeof str !== 'string') return '';
-    return str
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-      .replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');
   }
   function safeGetLocal(key) {
     try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
@@ -786,7 +751,6 @@
     try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
   }
   function isValidCode(code) {
-    // only allow alphanumeric 6-30 chars — blocks injection via ?ref=
     return typeof code === 'string' && /^[a-zA-Z0-9]{6,30}$/.test(code);
   }
   function isValidEmail(email) {
@@ -797,9 +761,6 @@
   function getRefUrl() {
     return window.location.origin + window.location.pathname + '?ref=' + user.code;
   }
-
-  // ── API CALLS — all go through /api/ server functions ─────────
-  // Supabase key is NEVER in this file — it lives in Vercel env vars
 
   function apiGetUser(email) {
     return fetch('/api/getuser', {
@@ -826,7 +787,6 @@
     }).then(function(r) { return r.json(); });
   }
 
-  // ── PAGE LOAD ──────────────────────────────────────────────────
   window.onload = function() {
     var saved = safeGetLocal('phiprep_v1');
     var params = new URLSearchParams(window.location.search);
@@ -834,8 +794,6 @@
 
     if (saved && saved.email && saved.code && isValidEmail(saved.email)) {
       user = saved;
-
-      // fetch latest from server — server has the real data
       apiGetUser(user.email).then(function(rows) {
         if (rows && rows.length > 0) {
           var row = rows[0];
@@ -851,29 +809,21 @@
         }
         renderDashboard();
       }).catch(function() { renderDashboard(); });
-
       go('s-success');
     } else {
-      // new visitor — save ref code if valid and not their own
       if (refInUrl && isValidCode(refInUrl)) {
         var myCode = saved ? saved.code : null;
-        if (refInUrl !== myCode) {
-          localStorage.setItem('phi_ref', refInUrl);
-        }
+        if (refInUrl !== myCode) localStorage.setItem('phi_ref', refInUrl);
       }
     }
   };
 
-  // ── NAVIGATION ─────────────────────────────────────────────────
   function go(id) {
-    document.querySelectorAll('.screen').forEach(function(s) {
-      s.classList.remove('active');
-    });
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
     window.scrollTo(0, 0);
   }
 
-  // ── FORM STEPS ─────────────────────────────────────────────────
   function doEmail() {
     var v = document.getElementById('emailInput').value.trim().toLowerCase();
     if (!v) { document.getElementById('emailErr').textContent = 'Email is required.'; return; }
@@ -890,11 +840,8 @@
   });
 
   function pick(group, btn) {
-    btn.parentElement.querySelectorAll('.choice-btn').forEach(function(b) {
-      b.classList.remove('selected');
-    });
+    btn.parentElement.querySelectorAll('.choice-btn').forEach(function(b) { b.classList.remove('selected'); });
     btn.classList.add('selected');
-    // sanitize choice text before storing
     picked[group] = sanitize(btn.textContent.trim());
   }
 
@@ -904,8 +851,6 @@
     go('s-final');
   }
 
-  // bug fix: doFinalSkip also goes through captcha now
-  // removed skip bypass — was a security hole
   function doFinalSkip() {
     toast('Please complete the captcha to join.');
   }
@@ -913,7 +858,7 @@
   function doFinal() {
     var joinBtn = document.querySelector('#s-final .btn-primary');
     if (joinBtn.disabled) return;
-    if (signupInProgress) return; // prevent double submit
+    if (signupInProgress) return;
 
     var captcha = document.querySelector('[name="cf-turnstile-response"]');
     var token = captcha ? captcha.value : '';
@@ -937,10 +882,7 @@
         joinBtn.textContent = 'Joining...';
         signup(function(err) {
           signupInProgress = false;
-          if (err) {
-            joinBtn.disabled = false;
-            joinBtn.textContent = 'Join the Waitlist →';
-          }
+          if (err) { joinBtn.disabled = false; joinBtn.textContent = 'Join the Waitlist →'; }
         });
       } else {
         signupInProgress = false;
@@ -957,33 +899,26 @@
     });
   }
 
-  // ── SIGNUP ─────────────────────────────────────────────────────
   function signup(onError) {
     var referrerCode = localStorage.getItem('phi_ref');
-
-    // validate referrer code — block tampered values
     if (referrerCode && !isValidCode(referrerCode)) {
       referrerCode = null;
       localStorage.removeItem('phi_ref');
     }
 
-    // sanitize all inputs before sending to server
     var safeEmail = user.email.toLowerCase().trim().slice(0, 200);
     var safeExam  = sanitize(user.exam).slice(0, 50);
     var safeAi    = sanitize(user.ai).slice(0, 50);
     var safeProb  = sanitize(user.prob).slice(0, 100);
 
-    // double check email is still valid
     if (!isValidEmail(safeEmail)) {
       toast('Invalid email. Please go back and try again.');
       if (onError) onError(true);
       return;
     }
 
-    // check if already signed up via server
     apiGetUser(safeEmail).then(function(rows) {
       if (rows && rows.length > 0) {
-        // already exists — load their data
         var row = rows[0];
         user.position = parseInt(row.position) || 1000;
         user.refs     = parseInt(row.refs)     || 0;
@@ -997,27 +932,19 @@
         return;
       }
 
-      // generate position
-      var base = Math.floor(Math.random() * 3000) + 800;
-      if (referrerCode) base = Math.floor(base * 0.82);
-
-      user.position = Math.max(1, base);
-      user.total    = base + Math.floor(Math.random() * 1200) + 300;
+      user.position = 1000;
+      user.total    = 1500;
       user.refs     = 0;
       user.movedUp  = 0;
 
-      // generate referral code — alphanumeric only
       var clean = safeEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
       user.code = clean + Math.floor(Math.random() * 9000 + 1000);
 
-      // send to server — server talks to Supabase, not browser
       apiSignup({
         email:       safeEmail,
         exam:        safeExam,
         ai_usage:    safeAi,
         problem:     safeProb,
-        position:    user.position,
-        total:       user.total,
         refs:        0,
         moved_up:    0,
         code:        user.code,
@@ -1029,10 +956,13 @@
           return;
         }
 
-        // save to localStorage only after server confirms
+        if (res.position) {
+          user.position = res.position;
+          user.total    = res.total || res.position + 500;
+        }
+
         safeSetLocal('phiprep_v1', user);
 
-        // credit referrer via server
         if (referrerCode) {
           apiReferral(referrerCode).catch(function(e) {
             console.log('referral credit error:', e);
@@ -1040,9 +970,7 @@
           localStorage.removeItem('phi_ref');
         }
 
-        // save to sheets via server
         saveToSheets(safeEmail, safeExam, safeAi, safeProb, user.position, user.code, referrerCode || 'direct');
-
         renderDashboard();
         go('s-success');
 
@@ -1057,15 +985,11 @@
     });
   }
 
-  // sheets token moved to server — but since sheets uses no-cors
-  // we keep it here with rate limiting as backup
-  // note: move this to an api route in future for full security
   function saveToSheets(email, exam, ai, prob, position, code, referredBy) {
     var lastSubmit = localStorage.getItem('phi_last_submit');
     var now = Date.now();
     if (lastSubmit && (now - parseInt(lastSubmit)) < 60000) return;
     localStorage.setItem('phi_last_submit', now);
-
     fetch('https://script.google.com/macros/s/AKfycbzh230pqnOuXrTJWb7hUf9vMlH_RsWvH6ayG_GbSuS-fXcNJ8rTHcWMgiNx0H2MkAK3/exec', {
       method: 'POST',
       mode: 'no-cors',
@@ -1079,20 +1003,16 @@
     }).catch(function() {});
   }
 
-  // ── DASHBOARD ──────────────────────────────────────────────────
   function renderDashboard() {
     document.getElementById('totalNum').textContent = user.total.toLocaleString();
     document.getElementById('refLinkText').textContent = getRefUrl();
-
     if (!dashRendered) {
       countDown('posNum', user.position + 400, user.position, '#', 1000);
       dashRendered = true;
     } else {
       document.getElementById('posNum').textContent = '#' + user.position.toLocaleString();
     }
-
     updateMilestones(user.refs);
-
     if (user.movedUp > 0) {
       document.getElementById('movedNum').textContent = user.movedUp;
       document.getElementById('movedBadge').classList.add('visible');
@@ -1117,17 +1037,14 @@
   function updateMilestones(refs) {
     document.getElementById('refNum').textContent = refs;
     document.getElementById('refBar').style.width = Math.min((refs / 10) * 100, 100) + '%';
-
-    var hint = refs < 1  ? '1 referral = 10 spots ahead'         :
+    var hint = refs < 1  ? '1 referral = 10 spots ahead' :
                refs < 5  ? (5 - refs)  + ' more for beta access' :
                refs < 10 ? (10 - refs) + ' more for 3 months free Pro' :
                            'All rewards unlocked!';
     document.getElementById('progressHint').textContent = hint;
-
     document.getElementById('mc1').textContent = Math.min(refs, 1)  + ' / 1';
     document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
     document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
-
     if (refs >= 1)  document.getElementById('m1').classList.add('done');
     if (refs >= 5)  document.getElementById('m2').classList.add('done');
     if (refs >= 10) document.getElementById('m3').classList.add('done');
@@ -1135,7 +1052,6 @@
     if (refs < 10)  document.getElementById('m3').classList.remove('done');
   }
 
-  // ── COPY + SHARE ───────────────────────────────────────────────
   function doCopy() {
     var url = getRefUrl();
     var temp = document.createElement('textarea');
@@ -1174,3 +1090,4 @@
 </script>
 </body>
 </html>
+```
