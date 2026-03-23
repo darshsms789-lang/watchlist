@@ -850,30 +850,24 @@
     if (saved) {
       user = JSON.parse(saved);
 
-      // fetch latest refs from supabase on every visit
-      // this is what makes cross device work
+      // supabase is source of truth — just pull latest data directly
       sbGetByEmail(user.email).then(function(rows) {
         if (rows && rows.length > 0) {
           var row = rows[0];
-          var latestRefs = row.refs || 0;
 
-          if (latestRefs > user.refs) {
-            // new referrals came in from other devices
-            var newSignups = latestRefs - user.refs;
-            for (var i = 0; i < newSignups; i++) {
-              var gain = 10;
-              user.position = Math.max(1, user.position - gain);
-              user.movedUp += gain;
-            }
-            user.refs = latestRefs;
-            user.position = row.position;
-            localStorage.setItem('phiprep_v1', JSON.stringify(user));
-            toast('↑ You have ' + latestRefs + ' referral' + (latestRefs > 1 ? 's' : '') + '! You moved up the list.');
+          // just use whatever supabase has — no local calculations
+          var oldRefs = user.refs;
+          user.position = row.position;
+          user.refs     = row.refs || 0;
+          user.movedUp  = row.moved_up || 0;
+          localStorage.setItem('phiprep_v1', JSON.stringify(user));
+
+          if (user.refs > oldRefs) {
+            toast('↑ New referral! You moved up ' + (user.refs - oldRefs) * 10 + ' spots.');
           }
         }
         renderDashboard();
       }).catch(function() {
-        // if supabase fails just show local data
         renderDashboard();
       });
 
@@ -926,76 +920,122 @@
   }
 
   function doFinal() {
+    // prevent double click
+    var joinBtn = document.querySelector('#s-final .btn-primary');
+    if (joinBtn.disabled) return;
+
     // check captcha is completed
     var captcha = document.querySelector('[name="cf-turnstile-response"]');
     if (!captcha || !captcha.value) {
       toast('Please complete the captcha first');
       return;
     }
+
     user.ai = picked.ai || '';
     user.prob = picked.prob || '';
-    signup();
+
+    // disable button and show loading
+    joinBtn.disabled = true;
+    joinBtn.textContent = 'Joining...';
+
+    signup(function(err) {
+      // re-enable if something went wrong
+      if (err) {
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join the Waitlist →';
+      }
+    });
   }
 
 
 
-  function signup() {
-    var base = Math.floor(Math.random() * 3000) + 800;
+  function signup(onError) {
     var referrerCode = localStorage.getItem('phi_ref');
 
-    if (referrerCode) base = Math.floor(base * 0.82);
-
-    user.position = base;
-    user.total    = base + Math.floor(Math.random() * 1200) + 300;
-    user.refs     = 0;
-    user.movedUp  = 0;
-
-    var clean = user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
-    user.code = clean + Math.floor(Math.random() * 9000 + 1000);
-
-    localStorage.setItem('phiprep_v1', JSON.stringify(user));
-
-    // insert into supabase
-    sbInsert({
-      email:       user.email,
-      exam:        user.exam,
-      ai_usage:    user.ai,
-      problem:     user.prob,
-      position:    user.position,
-      total:       user.total,
-      refs:        0,
-      moved_up:    0,
-      code:        user.code,
-      referred_by: referrerCode || 'direct'
-    }).then(function() {
-      // if came via referral — update the referrer's refs count and position in supabase
-      if (referrerCode) {
-        sbGetByCode(referrerCode).then(function(rows) {
-          if (rows && rows.length > 0) {
-            var referrer = rows[0];
-            var newRefs = (referrer.refs || 0) + 1;
-            var gain = 10;
-            var newPos = Math.max(1, (referrer.position || 1) - gain);
-            var newMovedUp = (referrer.moved_up || 0) + gain;
-
-            sbUpdate(referrerCode, {
-              refs:     newRefs,
-              position: newPos,
-              moved_up: newMovedUp
-            });
-          }
-        });
-        localStorage.removeItem('phi_ref');
+    // check if email already signed up in supabase before doing anything
+    sbGetByEmail(user.email).then(function(rows) {
+      if (rows && rows.length > 0) {
+        // already signed up — just load their existing data
+        var row = rows[0];
+        user.position = row.position;
+        user.refs     = row.refs || 0;
+        user.movedUp  = row.moved_up || 0;
+        user.code     = row.code;
+        user.total    = row.total;
+        localStorage.setItem('phiprep_v1', JSON.stringify(user));
+        renderDashboard();
+        go('s-success');
+        toast('Welcome back! Your spot is saved.');
+        return;
       }
-    }).catch(function(err) {
-      console.log('supabase insert error:', err);
+
+      // not signed up yet — proceed
+      var base = Math.floor(Math.random() * 3000) + 800;
+      if (referrerCode) base = Math.floor(base * 0.82);
+
+      user.position = Math.max(1, base); // never let position be 0
+      user.total    = base + Math.floor(Math.random() * 1200) + 300;
+      user.refs     = 0;
+      user.movedUp  = 0;
+
+      var clean = user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+      user.code = clean + Math.floor(Math.random() * 9000 + 1000);
+
+      sbInsert({
+        email:       user.email,
+        exam:        user.exam,
+        ai_usage:    user.ai,
+        problem:     user.prob,
+        position:    user.position,
+        total:       user.total,
+        refs:        0,
+        moved_up:    0,
+        code:        user.code,
+        referred_by: referrerCode || 'direct'
+      }).then(function(res) {
+        if (!res.ok && res.status !== 201) {
+          toast('Something went wrong. Please try again.');
+          if (onError) onError(true);
+          return;
+        }
+
+        // save locally only after supabase confirms
+        localStorage.setItem('phiprep_v1', JSON.stringify(user));
+
+        // credit the referrer
+        if (referrerCode) {
+          sbGetByCode(referrerCode).then(function(rows) {
+            if (rows && rows.length > 0) {
+              var referrer = rows[0];
+              var newRefs  = (referrer.refs || 0) + 1;
+              var oldPos   = referrer.position || 1000;
+              var newPos   = Math.max(1, oldPos - 10);
+              sbUpdate(referrerCode, {
+                refs:     newRefs,
+                position: newPos,
+                moved_up: (referrer.moved_up || 0) + 10
+              });
+            }
+          });
+          localStorage.removeItem('phi_ref');
+        }
+
+        // save to sheets with correct referredBy
+        saveToSheets(user, referrerCode);
+
+        renderDashboard();
+        go('s-success');
+
+      }).catch(function(err) {
+        console.log('supabase insert error:', err);
+        toast('Connection error. Please try again.');
+        if (onError) onError(true);
+      });
+
+    }).catch(function() {
+      toast('Connection error. Please try again.');
+      if (onError) onError(true);
     });
-
-    // also save to google sheets as backup
-    saveToSheets(user);
-
-    renderDashboard();
-    go('s-success');
   }
 
   function saveToSheets(u) {
@@ -1069,23 +1109,31 @@
   function updateMilestones(refs) {
     document.getElementById('refNum').textContent = refs;
 
+    // progress bar goes to 10 total
     var pct = Math.min((refs / 10) * 100, 100);
     document.getElementById('refBar').style.width = pct + '%';
 
+    // hint text
     var hint = '';
     if      (refs < 1)  hint = '1 referral = 10 spots ahead →';
-    else if (refs < 5)  hint = 'Refer ' + (5 - refs)  + ' more for beta access →';
+    else if (refs < 5)  hint = 'Refer ' + (5 - refs) + ' more for beta access →';
     else if (refs < 10) hint = 'Refer ' + (10 - refs) + ' more for 3 months free Pro →';
     else                hint = '🎉 All milestones unlocked!';
     document.getElementById('progressHint').textContent = hint;
 
+    // milestone counts — each has its own threshold
     document.getElementById('mc1').textContent = Math.min(refs, 1)  + ' / 1';
     document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
     document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
 
+    // unlock milestones independently
     if (refs >= 1)  document.getElementById('m1').classList.add('done');
     if (refs >= 5)  document.getElementById('m2').classList.add('done');
     if (refs >= 10) document.getElementById('m3').classList.add('done');
+
+    // make sure higher milestones dont unlock early
+    if (refs < 5)  document.getElementById('m2').classList.remove('done');
+    if (refs < 10) document.getElementById('m3').classList.remove('done');
   }
 
   function getRefUrl() {
