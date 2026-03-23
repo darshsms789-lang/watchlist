@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
   try {
 
-    const token = req.body?.token;
+    const { token } = req.body;
 
     if (!token) {
       return res.status(400).json({
@@ -17,17 +17,21 @@ export default async function handler(req, res) {
 
     const secret = process.env.TURNSTILE_SECRET;
 
+    if (!secret) {
+      return res.status(500).json({
+        success: false,
+        error: "Turnstile secret missing"
+      });
+    }
+
     const response = await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/x-www-form-urlencoded"
         },
-        body: JSON.stringify({
-          secret: secret,
-          response: token
-        })
+        body: `secret=${secret}&response=${token}`
       }
     );
 
@@ -44,7 +48,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Verify error:", error);
 
     return res.status(500).json({
       success: false,
