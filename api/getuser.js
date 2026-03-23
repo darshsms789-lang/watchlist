@@ -1,52 +1,44 @@
 export default async function handler(req, res) {
+
+  if (req.method !== 'POST') {
+    return res.status(405).end();
+  }
+
+  var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
+  var SB_KEY = process.env.SUPABASE_KEY;
+
+  if (!SB_KEY) {
+    return res.status(500).json({ status: 'error', message: 'Missing SUPABASE_KEY env var' });
+  }
+
+  var email = req.body.email;
+
+  if (!email) {
+    return res.status(400).json({ status: 'error', message: 'No email' });
+  }
+
   try {
-
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Method not allowed" });
-    }
-
-    const SB_URL = "https://zuidgbvnyonyxzfsepox.supabase.co";
-    const SB_KEY = process.env.SUPABASE_KEY;
-
-    if (!SB_KEY) {
-      return res.status(500).json({ error: "Supabase key missing" });
-    }
-
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ status: "no email" });
-    }
-
-    const response = await fetch(
-      `${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}&select=*`,
+    var response = await fetch(
+      SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(email) + '&select=*',
       {
-        method: "GET",
         headers: {
-          apikey: SB_KEY,
-          Authorization: `Bearer ${SB_KEY}`,
-          "Content-Type": "application/json"
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY
         }
       }
     );
 
-    const rows = await response.json();
+    var rows = await response.json();
 
     if (rows && rows.length > 0) {
-      return res.status(200).json({
-        status: "found",
-        data: rows[0]
-      });
-    } else {
-      return res.status(404).json({
-        status: "not found"
-      });
+      return res.status(200).json({ status: 'found', data: rows[0] });
     }
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: "Server error"
-    });
+    return res.status(200).json({ status: 'not found', data: null });
+
+  } catch (err) {
+    console.error('getuser error:', err);
+    return res.status(500).json({ status: 'error' });
   }
+
 }
