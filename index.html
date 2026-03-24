@@ -740,17 +740,30 @@
     return res.json();
   }
 
-  window.onload = function() {
+window.onload = async function() {
     var sessionToken = localStorage.getItem('phi_session');
+    
+    // If user is already "logged in", fetch their latest data
     if (sessionToken) {
-      apiCall('/api/getuser', { token: sessionToken }).then(function(d) {
+        const res = await fetch('/api/getuser', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: sessionToken })
+        });
+        const d = await res.json();
         if (d.data) {
-          user = { ...user, ...d.data, position: parseInt(d.data.position), total: parseInt(d.data.total) };
-          renderDashboard();
-          go('s-success');
+            user = d.data; // Sync local user object with DB
+            renderDashboard();
+            go('s-success'); // Skip the email/exam screens
+            return;
         }
-      }).catch(() => localStorage.removeItem('phi_session'));
     }
+
+    // Handle incoming referral link
+    var params = new URLSearchParams(window.location.search);
+    var ref = params.get('ref');
+    if (ref) localStorage.setItem('phi_ref', ref);
+};
     var params = new URLSearchParams(window.location.search);
     var ref = params.get('ref');
     if (ref && isValidCode(ref)) localStorage.setItem('phi_ref', ref);
