@@ -1,4 +1,8 @@
 import crypto from 'crypto';
+import dns from 'dns';
+import { promisify } from 'util';
+
+var resolveMx = promisify(dns.resolveMx);
 
 export default async function handler(req, res) {
 
@@ -19,20 +23,35 @@ export default async function handler(req, res) {
 
   var body = req.body;
 
-  // strict email validation
+  if (!body || !body.email) {
+    return res.status(400).json({ status: 'error', message: 'No email' });
+  }
+
+  // strict email format check
   var emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-  if (!body || !body.email || !emailRegex.test(body.email)) {
+  if (!emailRegex.test(body.email)) {
+    return res.status(400).json({ status: 'error', message: 'Invalid email format' });
+  }
+
+  // block spam patterns
+  if (/\d{4,}/.test(body.email.split('@')[0])) {
     return res.status(400).json({ status: 'error', message: 'Invalid email' });
   }
 
-  // block spam patterns — 4+ numbers in a row
-  if (/\d{4,}/.test(body.email.split('@')[0])) {
-    return res.status(400).json({ status: 'error', message: 'Invalid email format' });
+  // check email domain has real MX records
+  try {
+    var domain = body.email.split('@')[1];
+    var mx = await resolveMx(domain);
+    if (!mx || mx.length === 0) {
+      return res.status(400).json({ status: 'error', message: 'Email domain does not exist' });
+    }
+  } catch (e) {
+    return res.status(400).json({ status: 'error', message: 'Email domain invalid' });
   }
 
   try {
 
-    // check duplicate — if exists return their session token
+    // check duplicate
     var check = await fetch(
       SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(body.email) + '&select=*',
       { headers: headers }
@@ -40,7 +59,6 @@ export default async function handler(req, res) {
     var existing = await check.json();
 
     if (existing && existing.length > 0) {
-      // generate new session token for returning user
       var returnToken = crypto.randomBytes(32).toString('hex');
       await fetch(
         SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(body.email),
@@ -70,7 +88,6 @@ export default async function handler(req, res) {
       position = Math.max(1000, position - 5);
     }
 
-    // generate secure session token
     var sessionToken = crypto.randomBytes(32).toString('hex');
 
     var insertData = {
@@ -94,7 +111,6 @@ export default async function handler(req, res) {
     });
 
     if (insert.ok || insert.status === 201) {
-      // increment counter
       await fetch(SB_URL + '/rest/v1/counter?id=eq.total_users', {
         method: 'PATCH',
         headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
