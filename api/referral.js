@@ -5,9 +5,7 @@ export default async function handler(req, res) {
   var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
   var SB_KEY = process.env.SUPABASE_KEY;
 
-  if (!SB_KEY) {
-    return res.status(500).json({ status: 'error' });
-  }
+  if (!SB_KEY) return res.status(500).json({ status: 'error' });
 
   var headers = {
     'Content-Type': 'application/json',
@@ -17,7 +15,6 @@ export default async function handler(req, res) {
 
   var code = req.body.code;
 
-  // validate code — alphanumeric only
   if (!code || !/^[a-zA-Z0-9]{6,30}$/.test(code)) {
     return res.status(400).json({ status: 'invalid code' });
   }
@@ -30,7 +27,7 @@ export default async function handler(req, res) {
     var rows = await get.json();
 
     if (!rows || rows.length === 0) {
-      return res.status(404).json({ status: 'not found' });
+      return res.status(200).json({ status: 'not found' });
     }
 
     var ref      = rows[0];
