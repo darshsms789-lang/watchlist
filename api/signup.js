@@ -33,10 +33,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ status: 'error', message: 'Invalid email format' });
   }
 
-  // block spam patterns
-  if (/\d{4,}/.test(body.email.split('@')[0])) {
-    return res.status(400).json({ status: 'error', message: 'Invalid email' });
-  }
+
 
   // check email domain has real MX records
   try {
