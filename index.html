@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PhiPrep — Join the Waitlist</title>
 
-  <!-- Supabase URL removed from CSP — frontend never talks to Supabase directly -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data:; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
@@ -545,25 +544,16 @@
       .share-btn { font-size: 0.72rem; }
       .foot-note { padding: 0 18px 14px; }
     }
-
-    @media (max-width: 380px) {
-      .position-number { font-size: 2.8rem; }
-      h1 { font-size: 1.25rem; }
-      .share-btn { font-size: 0.65rem; gap: 3px; }
-    }
   </style>
 </head>
 <body>
 <div class="wrap">
-
   <div class="top-brand">
     <div class="logo">Phi<span>Prep</span></div>
     <div class="tagline">Early Access Waitlist</div>
   </div>
 
   <div class="card">
-
-    <!-- WELCOME -->
     <div class="screen active" id="s-welcome">
       <h1>Stop getting answers.<br/>Start <span>thinking.</span></h1>
       <p class="subtitle">Most AI tools just dump solutions. PhiPrep teaches you how to actually think through JEE problems — step by step.</p>
@@ -577,7 +567,6 @@
       <p style="font-size:0.75rem; color:var(--light); text-align:center; margin-top:12px;">Free to join. No spam. Ever.</p>
     </div>
 
-    <!-- EMAIL -->
     <div class="screen" id="s-email">
       <div class="step-bar">
         <div class="step-dot active"></div>
@@ -591,7 +580,6 @@
       <button class="btn-primary" id="emailBtn" onclick="doEmail()">Continue →</button>
     </div>
 
-    <!-- EXAM -->
     <div class="screen" id="s-exam">
       <div class="step-bar">
         <div class="step-dot done"></div>
@@ -610,7 +598,6 @@
       <button class="btn-primary" onclick="doExam()">Continue →</button>
     </div>
 
-    <!-- FINAL -->
     <div class="screen" id="s-final">
       <div class="step-bar">
         <div class="step-dot done"></div>
@@ -638,7 +625,6 @@
       <button class="btn-skip" onclick="doFinalSkip()">Skip and join</button>
     </div>
 
-    <!-- SUCCESS -->
     <div class="screen" id="s-success">
       <div class="success-header">
         <div class="success-label">You're on the list ✓</div>
@@ -704,37 +690,32 @@
           <button class="share-btn" onclick="doTelegram()">✈️ Telegram</button>
         </div>
       </div>
-
       <p class="foot-note">Every signup using your link = 10 spots ahead for you.</p>
     </div>
-
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+  // Core user state
   var user = { email:'', exam:'', ai:'', prob:'', position:0, total:0, refs:0, movedUp:0, code:'' };
   var picked = { exam:null, ai:null, prob:null };
   var dashRendered = false;
   var signupInProgress = false;
 
+  // Utilities
   function sanitize(str) {
     if (typeof str !== 'string') return '';
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');
   }
-  function isValidCode(code) {
-    return typeof code === 'string' && /^[a-zA-Z0-9]{6,30}$/.test(code);
-  }
+  function isValidCode(code) { return typeof code === 'string' && /^[a-zA-Z0-9]{6,30}$/.test(code); }
   function isValidEmail(email) {
-    return typeof email === 'string' &&
-      /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email) &&
-      email.length <= 200;
+    return typeof email === 'string' && /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email) && email.length <= 200;
   }
-  function getRefUrl() {
-    return window.location.origin + window.location.pathname + '?ref=' + user.code;
-  }
+  function getRefUrl() { return window.location.origin + window.location.pathname + '?ref=' + user.code; }
 
+  // API calls
   function apiGetUser(sessionToken) {
     return fetch('/api/getuser', {
       method: 'POST',
@@ -768,6 +749,7 @@
     }).then(function(r) { return r.json(); });
   }
 
+  // Lifecycle
   window.onload = function() {
     var sessionToken = localStorage.getItem('phi_session');
     var params = new URLSearchParams(window.location.search);
@@ -777,24 +759,18 @@
       apiGetUser(sessionToken).then(function(rows) {
         if (rows && rows.length > 0) {
           var row = rows[0];
-          var oldRefs   = user.refs;
           user.position = parseInt(row.position) || 1000;
           user.refs     = parseInt(row.refs)     || 0;
           user.movedUp  = parseInt(row.moved_up) || 0;
           user.total    = parseInt(row.total)    || 1500;
           user.code     = row.code               || '';
           user.email    = row.email              || '';
-          if (user.refs > oldRefs) {
-            toast('↑ New referral! You moved up ' + (user.refs - oldRefs) * 10 + ' spots.');
-          }
           renderDashboard();
           go('s-success');
         } else {
           localStorage.removeItem('phi_session');
         }
-      }).catch(function() {
-        localStorage.removeItem('phi_session');
-      });
+      }).catch(function() { localStorage.removeItem('phi_session'); });
     } else {
       if (refInUrl && isValidCode(refInUrl)) {
         localStorage.setItem('phi_ref', refInUrl);
@@ -802,9 +778,11 @@
     }
   };
 
+  // UI Functions
   function go(id) {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-    document.getElementById(id).classList.add('active');
+    var target = document.getElementById(id);
+    if(target) target.classList.add('active');
     window.scrollTo(0, 0);
   }
 
@@ -812,23 +790,15 @@
     var v = document.getElementById('emailInput').value.trim().toLowerCase();
     var err = document.getElementById('emailErr');
     var btn = document.getElementById('emailBtn');
-
     if (!v) { err.textContent = 'Email is required.'; return; }
     if (!isValidEmail(v)) { err.textContent = 'Enter a valid email address.'; return; }
-    if (/\d{4,}/.test(v.split('@')[0])) { err.textContent = 'Enter a real email address.'; return; }
-
     btn.disabled = true;
     btn.textContent = 'Checking...';
-
     apiCheckDuplicate(v).then(function(data) {
       btn.disabled = false;
       btn.textContent = 'Continue →';
-      if (data.exists) {
-        err.textContent = 'This email is already on the waitlist.';
-      } else {
-        user.email = v;
-        go('s-exam');
-      }
+      if (data.exists) { err.textContent = 'This email is already on the waitlist.'; }
+      else { user.email = v; go('s-exam'); }
     }).catch(function() {
       btn.disabled = false;
       btn.textContent = 'Continue →';
@@ -838,12 +808,6 @@
   }
 
   function clearErr() { document.getElementById('emailErr').textContent = ''; }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key !== 'Enter') return;
-    var active = document.querySelector('.screen.active');
-    if (active && active.id === 's-email') doEmail();
-  });
 
   function pick(group, btn) {
     btn.parentElement.querySelectorAll('.choice-btn').forEach(function(b) { b.classList.remove('selected'); });
@@ -857,145 +821,56 @@
     go('s-final');
   }
 
-  function doFinalSkip() {
-    toast('Please complete the captcha to join.');
-  }
+  function doFinalSkip() { toast('Please complete the captcha to join.'); }
 
   function doFinal() {
     var joinBtn = document.querySelector('#s-final .btn-primary');
-    if (joinBtn.disabled) return;
-    if (signupInProgress) return;
-
     var captcha = document.querySelector('[name="cf-turnstile-response"]');
     var token = captcha ? captcha.value : '';
-
     if (!token) { toast('Please complete the captcha first'); return; }
-
     joinBtn.disabled = true;
     joinBtn.textContent = 'Verifying...';
     signupInProgress = true;
-
     fetch('/api/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: token })
-    })
-    .then(function(r) { return r.json(); })
+    }).then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.success) {
-        user.ai   = picked.ai   || '';
+        user.ai = picked.ai || '';
         user.prob = picked.prob || '';
-        joinBtn.textContent = 'Joining...';
         signup(function(err) {
           signupInProgress = false;
           if (err) { joinBtn.disabled = false; joinBtn.textContent = 'Join the Waitlist →'; }
         });
       } else {
         signupInProgress = false;
-        toast('Captcha failed. Please try again.');
+        toast('Captcha failed. Try again.');
         joinBtn.disabled = false;
-        joinBtn.textContent = 'Join the Waitlist →';
       }
-    })
-    .catch(function() {
+    }).catch(function() {
       signupInProgress = false;
-      toast('Connection error. Please try again.');
+      toast('Connection error.');
       joinBtn.disabled = false;
-      joinBtn.textContent = 'Join the Waitlist →';
     });
   }
 
   function signup(onError) {
     var referrerCode = localStorage.getItem('phi_ref');
-    if (referrerCode && !isValidCode(referrerCode)) {
-      referrerCode = null;
-      localStorage.removeItem('phi_ref');
-    }
-
-    var safeEmail = user.email.toLowerCase().trim().slice(0, 200);
-    var safeExam  = sanitize(user.exam).slice(0, 50);
-    var safeAi    = sanitize(user.ai).slice(0, 50);
-    var safeProb  = sanitize(user.prob).slice(0, 100);
-
-    if (!isValidEmail(safeEmail)) {
-      toast('Invalid email. Please go back and try again.');
-      if (onError) onError(true);
-      return;
-    }
-
-    var clean = safeEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
+    var clean = user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
     user.code = clean + Math.floor(Math.random() * 9000 + 1000);
-
     apiSignup({
-      email:       safeEmail,
-      exam:        safeExam,
-      ai_usage:    safeAi,
-      problem:     safeProb,
-      refs:        0,
-      moved_up:    0,
-      code:        user.code,
-      referred_by: referrerCode || 'direct'
+      email: user.email, exam: user.exam, ai_usage: user.ai, problem: user.prob,
+      refs: 0, moved_up: 0, code: user.code, referred_by: referrerCode || 'direct'
     }).then(function(res) {
-
-      if (res.status === 'error') {
-        toast('Something went wrong. Please try again.');
-        if (onError) onError(true);
-        return;
-      }
-
-      // store ONLY session token in localStorage
-      if (res.session_token) {
-        localStorage.setItem('phi_session', res.session_token);
-      }
-
-      if (res.status === 'exists' && res.data) {
-        user.position = parseInt(res.data.position) || 1000;
-        user.total    = parseInt(res.data.total)    || 1500;
-        user.refs     = parseInt(res.data.refs)     || 0;
-        user.movedUp  = parseInt(res.data.moved_up) || 0;
-        user.code     = res.data.code               || user.code;
-        renderDashboard();
-        go('s-success');
-        toast('Welcome back! Your spot is saved.');
-        return;
-      }
-
-      if (res.position) {
-        user.position = res.position;
-        user.total    = res.total || res.position + 500;
-      }
-
-      if (referrerCode) {
-        apiReferral(referrerCode).catch(function() {});
-        localStorage.removeItem('phi_ref');
-      }
-
-      saveToSheets(safeEmail, safeExam, safeAi, safeProb, user.position, user.code, referrerCode || 'direct');
+      if (res.status === 'error') { toast('Error occurred.'); if (onError) onError(true); return; }
+      if (res.session_token) localStorage.setItem('phi_session', res.session_token);
+      user.position = res.position || 1000;
+      user.total = res.total || 1500;
       renderDashboard();
       go('s-success');
-
-    }).catch(function() {
-      toast('Connection error. Please try again.');
-      if (onError) onError(true);
-    });
-  }
-
-  function saveToSheets(email, exam, ai, prob, position, code, referredBy) {
-    var lastSubmit = localStorage.getItem('phi_last_submit');
-    var now = Date.now();
-    if (lastSubmit && (now - parseInt(lastSubmit)) < 60000) return;
-    localStorage.setItem('phi_last_submit', now);
-    fetch('https://script.google.com/macros/s/AKfycbzh230pqnOuXrTJWb7hUf9vMlH_RsWvH6ayG_GbSuS-fXcNJ8rTHcWMgiNx0H2MkAK3/exec', {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: 'phiprep_secret_2024',
-        email: email, exam: exam, ai: ai,
-        problem: prob, position: position,
-        code: code, referredBy: referredBy
-      })
-    }).catch(function() {});
+    }).catch(function() { toast('Connection error.'); if (onError) onError(true); });
   }
 
   function renderDashboard() {
@@ -1008,11 +883,6 @@
       document.getElementById('posNum').textContent = '#' + user.position.toLocaleString();
     }
     updateMilestones(user.refs);
-    if (user.movedUp > 0) {
-      document.getElementById('movedNum').textContent = user.movedUp;
-      document.getElementById('movedBadge').classList.add('visible');
-      document.getElementById('posNum').classList.add('moved');
-    }
   }
 
   function countDown(elId, from, to, prefix, ms) {
@@ -1032,49 +902,28 @@
   function updateMilestones(refs) {
     document.getElementById('refNum').textContent = refs;
     document.getElementById('refBar').style.width = Math.min((refs / 10) * 100, 100) + '%';
-    var hint = refs < 1  ? '1 referral = 10 spots ahead' :
-               refs < 5  ? (5 - refs)  + ' more for beta access' :
-               refs < 10 ? (10 - refs) + ' more for 3 months free Pro' :
-                           'All rewards unlocked!';
-    document.getElementById('progressHint').textContent = hint;
-    document.getElementById('mc1').textContent = Math.min(refs, 1)  + ' / 1';
-    document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
-    document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
     if (refs >= 1)  document.getElementById('m1').classList.add('done');
     if (refs >= 5)  document.getElementById('m2').classList.add('done');
     if (refs >= 10) document.getElementById('m3').classList.add('done');
-    if (refs < 5)   document.getElementById('m2').classList.remove('done');
-    if (refs < 10)  document.getElementById('m3').classList.remove('done');
   }
 
   function doCopy() {
     var url = getRefUrl();
     var temp = document.createElement('textarea');
     temp.value = url;
-    temp.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
     document.body.appendChild(temp);
-    temp.focus(); temp.select();
+    temp.select();
     document.execCommand('copy');
     document.body.removeChild(temp);
     var btn = document.getElementById('copyBtn');
     btn.textContent = 'Copied!';
-    btn.classList.add('done');
-    setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 2000);
-    toast('Link copied! Share it with your friends.');
+    setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    toast('Link copied!');
   }
 
-  function doWhatsapp() {
-    var url = getRefUrl();
-    window.open('https://wa.me/?text=' + encodeURIComponent('I joined the PhiPrep waitlist — an AI tutor that teaches you HOW to think through JEE problems. Join here: ' + url), '_blank');
-  }
-  function doTwitter() {
-    var url = getRefUrl();
-    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent('Just joined @PhiPrep — AI tutor for JEE prep. Teaches thinking, not just answers. ' + url), '_blank');
-  }
-  function doTelegram() {
-    var url = getRefUrl();
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Join PhiPrep waitlist for JEE prep'), '_blank');
-  }
+  function doWhatsapp() { window.open('https://wa.me/?text=' + encodeURIComponent('Join PhiPrep: ' + getRefUrl()), '_blank'); }
+  function doTwitter() { window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent('Join PhiPrep: ' + getRefUrl()), '_blank'); }
+  function doTelegram() { window.open('https://t.me/share/url?url=' + encodeURIComponent(getRefUrl()), '_blank'); }
 
   function toast(msg) {
     var t = document.getElementById('toast');
