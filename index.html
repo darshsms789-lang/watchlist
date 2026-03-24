@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PhiPrep — Join the Waitlist</title>
 
-  <!-- Supabase URL removed from CSP — frontend never talks to Supabase directly -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://script.google.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data:; object-src 'none';"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data:; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
 
@@ -14,7 +13,7 @@
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --bg:      #f7f4ef;
@@ -60,11 +59,8 @@
       margin: 0 auto;
     }
 
-    .top-brand {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
+    /* Brand */
+    .top-brand { text-align: center; margin-bottom: 28px; }
     .top-brand .logo {
       font-family: 'Playfair Display', serif;
       font-size: 1.6rem;
@@ -72,9 +68,7 @@
       color: var(--text);
       letter-spacing: -0.01em;
     }
-
     .top-brand .logo span { color: var(--accent); }
-
     .top-brand .tagline {
       font-size: 0.8rem;
       color: var(--light);
@@ -83,6 +77,7 @@
       text-transform: uppercase;
     }
 
+    /* Card */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -91,12 +86,12 @@
       overflow: hidden;
     }
 
+    /* Screens */
     .screen {
       display: none;
       padding: 36px 32px 32px;
       animation: fadeIn 0.25s ease;
     }
-
     .screen.active { display: block; }
 
     @keyframes fadeIn {
@@ -104,23 +99,35 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .step-bar {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 28px;
-    }
-
+    /* Step bar */
+    .step-bar { display: flex; gap: 4px; margin-bottom: 28px; }
     .step-dot {
-      height: 2px;
-      flex: 1;
+      height: 2px; flex: 1;
       background: #e8e4de;
       border-radius: 2px;
       transition: background 0.3s;
     }
-
-    .step-dot.done { background: var(--accent); }
+    .step-dot.done   { background: var(--accent); }
     .step-dot.active { background: #7ab595; }
 
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      color: var(--light);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      margin-bottom: 20px;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--muted); }
+
+    /* Typography */
     h1 {
       font-family: 'Playfair Display', serif;
       font-size: 1.75rem;
@@ -130,7 +137,6 @@
       margin-bottom: 10px;
       letter-spacing: -0.02em;
     }
-
     h1 span { color: var(--accent); }
 
     .subtitle {
@@ -138,33 +144,6 @@
       color: var(--muted);
       line-height: 1.7;
       margin-bottom: 24px;
-    }
-
-    .feature-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 28px;
-      padding: 20px;
-      background: #f9f7f4;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 0.875rem;
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    .feature-item::before {
-      content: '→';
-      color: var(--accent);
-      font-weight: 600;
-      flex-shrink: 0;
     }
 
     .q-label {
@@ -175,7 +154,6 @@
       color: var(--light);
       margin-bottom: 6px;
     }
-
     .q-title {
       font-family: 'Playfair Display', serif;
       font-size: 1.2rem;
@@ -185,6 +163,33 @@
       margin-bottom: 20px;
     }
 
+    /* Feature list */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 28px;
+      padding: 20px;
+      background: #f9f7f4;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .feature-item::before {
+      content: '→';
+      color: var(--accent);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* Email input */
     .email-input {
       width: 100%;
       background: #fafaf9;
@@ -198,7 +203,6 @@
       transition: border-color 0.2s;
       margin-bottom: 6px;
     }
-
     .email-input::placeholder { color: #bbb8b2; }
     .email-input:focus { border-color: var(--accent); }
 
@@ -209,13 +213,13 @@
       margin-bottom: 12px;
     }
 
+    /* Choices */
     .choices {
       display: flex;
       flex-direction: column;
       gap: 7px;
       margin-bottom: 20px;
     }
-
     .choice-btn {
       width: 100%;
       padding: 11px 14px;
@@ -232,7 +236,6 @@
       align-items: center;
       gap: 10px;
     }
-
     .choice-btn::before {
       content: '';
       width: 14px;
@@ -242,21 +245,19 @@
       flex-shrink: 0;
       transition: all 0.15s;
     }
-
     .choice-btn:hover { border-color: var(--accent2); background: #f4f9f6; }
-
     .choice-btn.selected {
       border-color: var(--accent);
       background: #edf5f0;
       color: var(--accent);
       font-weight: 500;
     }
-
     .choice-btn.selected::before {
       background: var(--accent);
       border-color: var(--accent);
     }
 
+    /* Primary button */
     .btn-primary {
       width: 100%;
       padding: 13px;
@@ -271,32 +272,49 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-
-    .btn-primary:hover { background: var(--accent2); }
-    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:hover    { background: var(--accent2); }
+    .btn-primary:active   { transform: scale(0.99); }
     .btn-primary:disabled { background: #999; cursor: not-allowed; }
 
-    .btn-skip {
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      color: var(--light);
-      font-size: 0.8rem;
-      cursor: pointer;
-      margin-top: 6px;
-      font-family: 'Inter', sans-serif;
-      transition: color 0.2s;
+    /* Captcha */
+    .cf-turnstile {
+      margin: 16px 0 12px;
+      display: flex;
+      justify-content: center;
     }
 
-    .btn-skip:hover { color: var(--muted); }
+    /* Verify screen */
+    .verify-icon { font-size: 3rem; text-align: center; margin-bottom: 16px; }
+    .verify-note {
+      background: #f9f7f4;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 14px 16px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 20px;
+    }
+    .verify-note strong { color: var(--text); display: block; margin-bottom: 4px; }
+    .resend-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0;
+      text-decoration: underline;
+    }
+    .resend-btn:disabled { color: var(--light); cursor: not-allowed; text-decoration: none; }
 
+    /* Success header */
     .success-header {
       text-align: center;
       padding: 28px 20px 24px;
       border-bottom: 1px solid var(--border);
     }
-
     .success-label {
       font-size: 0.7rem;
       font-weight: 600;
@@ -305,7 +323,6 @@
       color: var(--accent);
       margin-bottom: 10px;
     }
-
     .position-number {
       font-family: 'Playfair Display', serif;
       font-size: 4.5rem;
@@ -315,9 +332,7 @@
       margin-bottom: 6px;
       letter-spacing: -0.03em;
     }
-
     .position-number.moved { color: var(--accent); }
-
     .position-sub { font-size: 0.85rem; color: var(--muted); }
 
     .moved-badge {
@@ -332,14 +347,13 @@
       color: var(--accent);
       width: fit-content;
     }
-
     .moved-badge.visible { display: block; }
 
+    /* Section blocks */
     .section-block {
       padding: 20px 24px;
       border-bottom: 1px solid var(--border);
     }
-
     .section-title {
       font-size: 0.7rem;
       font-weight: 600;
@@ -355,14 +369,8 @@
       justify-content: space-between;
       margin-bottom: 8px;
     }
-
     .ref-count-label { font-size: 0.875rem; color: var(--muted); }
-
-    .ref-count-num {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--accent);
-    }
+    .ref-count-num   { font-size: 0.875rem; font-weight: 600; color: var(--accent); }
 
     .progress-track {
       background: #e8e4de;
@@ -371,26 +379,16 @@
       overflow: hidden;
       margin-bottom: 6px;
     }
-
     .progress-fill {
       height: 100%;
       background: var(--accent);
       border-radius: 100px;
       transition: width 0.8s ease;
     }
+    .progress-hint { font-size: 0.75rem; color: var(--light); text-align: right; }
 
-    .progress-hint {
-      font-size: 0.75rem;
-      color: var(--light);
-      text-align: right;
-    }
-
-    .milestone-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
+    /* Milestones */
+    .milestone-list { display: flex; flex-direction: column; gap: 8px; }
     .ms-item {
       display: flex;
       align-items: center;
@@ -401,9 +399,7 @@
       border-radius: 3px;
       transition: all 0.2s;
     }
-
     .ms-item.done { background: #edf5f0; border-color: #b8d9c5; }
-
     .ms-num {
       font-family: 'Playfair Display', serif;
       font-size: 1.1rem;
@@ -411,36 +407,20 @@
       color: #ccc;
       min-width: 28px;
     }
-
     .ms-item.done .ms-num { color: var(--accent); }
     .ms-info { flex: 1; }
-
-    .ms-name {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 2px;
-    }
-
+    .ms-name { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
     .ms-item.done .ms-name { color: var(--accent); }
-    .ms-desc { font-size: 0.75rem; color: var(--light); }
-
-    .ms-count {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--light);
-      white-space: nowrap;
-    }
-
+    .ms-desc  { font-size: 0.75rem; color: var(--light); }
+    .ms-count { font-size: 0.78rem; font-weight: 600; color: var(--light); white-space: nowrap; }
     .ms-item.done .ms-count { color: var(--accent); }
 
+    /* Referral link */
     .ref-link-wrap {
       padding: 20px 24px;
       border-bottom: 1px solid var(--border);
     }
-
     .ref-link-box { display: flex; gap: 8px; }
-
     .ref-link-text {
       flex: 1;
       background: #f4f2ee;
@@ -454,7 +434,6 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-
     .copy-btn {
       padding: 10px 16px;
       background: var(--text);
@@ -468,13 +447,12 @@
       white-space: nowrap;
       transition: background 0.2s;
     }
-
     .copy-btn:hover { background: #333; }
-    .copy-btn.done { background: var(--accent); }
+    .copy-btn.done  { background: var(--accent); }
 
+    /* Share */
     .share-wrap { padding: 16px 24px 20px; }
-    .share-row { display: flex; gap: 8px; }
-
+    .share-row  { display: flex; gap: 8px; }
     .share-btn {
       flex: 1;
       padding: 10px 6px;
@@ -492,12 +470,7 @@
       gap: 5px;
       transition: all 0.15s;
     }
-
-    .share-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: #edf5f0;
-    }
+    .share-btn:hover { border-color: var(--accent); color: var(--accent); background: #edf5f0; }
 
     .foot-note {
       font-size: 0.75rem;
@@ -506,6 +479,7 @@
       padding: 0 24px 16px;
     }
 
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -524,15 +498,9 @@
       max-width: 90%;
       text-align: center;
     }
-
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .cf-turnstile {
-      margin: 16px 0 12px;
-      display: flex;
-      justify-content: center;
-    }
-
+    /* Responsive */
     @media (max-width: 520px) {
       body { padding: 16px 12px; align-items: flex-start; }
       .screen { padding: 24px 18px 20px; }
@@ -545,7 +513,6 @@
       .share-btn { font-size: 0.72rem; }
       .foot-note { padding: 0 18px 14px; }
     }
-
     @media (max-width: 380px) {
       .position-number { font-size: 2.8rem; }
       h1 { font-size: 1.25rem; }
@@ -563,7 +530,7 @@
 
   <div class="card">
 
-    <!-- WELCOME -->
+    <!-- SCREEN 1: WELCOME -->
     <div class="screen active" id="s-welcome">
       <h1>Stop getting answers.<br/>Start <span>thinking.</span></h1>
       <p class="subtitle">Most AI tools just dump solutions. PhiPrep teaches you how to actually think through JEE problems — step by step.</p>
@@ -577,13 +544,14 @@
       <p style="font-size:0.75rem; color:var(--light); text-align:center; margin-top:12px;">Free to join. No spam. Ever.</p>
     </div>
 
-    <!-- EMAIL -->
+    <!-- SCREEN 2: EMAIL -->
     <div class="screen" id="s-email">
       <div class="step-bar">
         <div class="step-dot active"></div>
         <div class="step-dot"></div>
         <div class="step-dot"></div>
       </div>
+      <button class="back-link" onclick="go('s-welcome')">← Back</button>
       <div class="q-label">Step 1 of 3</div>
       <div class="q-title">What's your email address?</div>
       <input class="email-input" type="email" id="emailInput" placeholder="you@example.com" oninput="clearErr()"/>
@@ -591,13 +559,14 @@
       <button class="btn-primary" id="emailBtn" onclick="doEmail()">Continue →</button>
     </div>
 
-    <!-- EXAM -->
+    <!-- SCREEN 3: EXAM PICKER -->
     <div class="screen" id="s-exam">
       <div class="step-bar">
         <div class="step-dot done"></div>
         <div class="step-dot active"></div>
         <div class="step-dot"></div>
       </div>
+      <button class="back-link" onclick="go('s-email')">← Back</button>
       <div class="q-label">Step 2 of 3</div>
       <div class="q-title">What exam are you preparing for?</div>
       <div class="choices">
@@ -610,13 +579,14 @@
       <button class="btn-primary" onclick="doExam()">Continue →</button>
     </div>
 
-    <!-- FINAL -->
+    <!-- SCREEN 4: AI USAGE + CAPTCHA -->
     <div class="screen" id="s-final">
       <div class="step-bar">
         <div class="step-dot done"></div>
         <div class="step-dot done"></div>
         <div class="step-dot active"></div>
       </div>
+      <button class="back-link" onclick="go('s-exam')">← Back</button>
       <div class="q-label">Step 3 of 3</div>
       <div class="q-title">Do you use AI tools like ChatGPT for studying?</div>
       <div class="choices" style="margin-bottom:20px;">
@@ -634,11 +604,28 @@
         <button class="choice-btn" onclick="pick('prob',this)">Not useful for JEE</button>
       </div>
       <div class="cf-turnstile" data-sitekey="0x4AAAAAACuv8_Yk78-b5UUC" data-theme="light"></div>
-      <button class="btn-primary" onclick="doFinal()">Join the Waitlist →</button>
-      <button class="btn-skip" onclick="doFinalSkip()">Skip and join</button>
+      <button class="btn-primary" id="joinBtn" onclick="doFinal()">Join the Waitlist →</button>
     </div>
 
-    <!-- SUCCESS -->
+    <!-- SCREEN 5: CHECK YOUR EMAIL -->
+    <div class="screen" id="s-verify">
+      <div class="verify-icon">📬</div>
+      <h1 style="text-align:center; font-size:1.5rem; margin-bottom:10px;">Check your inbox</h1>
+      <p class="subtitle" style="text-align:center; margin-bottom:0;">
+        We sent a confirmation link to<br/>
+        <strong id="sentToEmail" style="color:var(--accent); font-style:normal;"></strong>
+      </p>
+      <div class="verify-note">
+        <strong>Didn't get it?</strong>
+        Check your spam folder. Still nothing after 2 minutes?
+        <button class="resend-btn" id="resendBtn" onclick="resendVerify()">Resend email</button>.
+      </div>
+      <p style="font-size:0.75rem; color:var(--light); text-align:center; margin-top:20px;">
+        Click the link in the email to lock in your spot and get your referral link.
+      </p>
+    </div>
+
+    <!-- SCREEN 6: SUCCESS / DASHBOARD -->
     <div class="screen" id="s-success">
       <div class="success-header">
         <div class="success-label">You're on the list ✓</div>
@@ -700,7 +687,7 @@
       <div class="share-wrap">
         <div class="share-row">
           <button class="share-btn" onclick="doWhatsapp()">💬 WhatsApp</button>
-          <button class="share-btn" onclick="doTwitter()">🐦 Twitter</button>
+          <button class="share-btn" onclick="doTwitter()">🐦 Twitter/X</button>
           <button class="share-btn" onclick="doTelegram()">✈️ Telegram</button>
         </div>
       </div>
@@ -708,20 +695,24 @@
       <p class="foot-note">Every signup using your link = 10 spots ahead for you.</p>
     </div>
 
-  </div>
-</div>
+  </div><!-- /.card -->
+</div><!-- /.wrap -->
 
 <div class="toast" id="toast"></div>
 
 <script>
+  /* ── State ── */
   var user = { email:'', exam:'', ai:'', prob:'', position:0, total:0, refs:0, movedUp:0, code:'' };
   var picked = { exam:null, ai:null, prob:null };
   var dashRendered = false;
   var signupInProgress = false;
 
+  /* ── Helpers ── */
   function sanitize(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');
+    return str
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');
   }
   function isValidCode(code) {
     return typeof code === 'string' && /^[a-zA-Z0-9]{6,30}$/.test(code);
@@ -734,16 +725,20 @@
   function getRefUrl() {
     return window.location.origin + window.location.pathname + '?ref=' + user.code;
   }
+  function resetTurnstile() {
+    if (window.turnstile) { try { window.turnstile.reset(); } catch(e) {} }
+  }
 
-  function apiGetUser(sessionToken) {
+  /* ── API wrappers ── */
+  function apiGetUser(token) {
     return fetch('/api/getuser', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_token: sessionToken })
-    }).then(function(r) { return r.json(); })
-      .then(function(d) { return d.data ? [d.data] : []; });
+      body: JSON.stringify({ session_token: token })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { return d.data ? [d.data] : []; });
   }
-
   function apiSignup(data) {
     return fetch('/api/signup', {
       method: 'POST',
@@ -751,7 +746,6 @@
       body: JSON.stringify(data)
     }).then(function(r) { return r.json(); });
   }
-
   function apiReferral(code) {
     return fetch('/api/referral', {
       method: 'POST',
@@ -759,7 +753,6 @@
       body: JSON.stringify({ code: code })
     }).then(function(r) { return r.json(); });
   }
-
   function apiCheckDuplicate(email) {
     return fetch('/api/checkduplicate', {
       method: 'POST',
@@ -768,60 +761,93 @@
     }).then(function(r) { return r.json(); });
   }
 
-  window.onload = function() {
-    var sessionToken = localStorage.getItem('phi_session');
-    var params = new URLSearchParams(window.location.search);
-    var refInUrl = params.get('ref');
-
-    if (sessionToken) {
-      apiGetUser(sessionToken).then(function(rows) {
-        if (rows && rows.length > 0) {
-          var row = rows[0];
-          var oldRefs   = user.refs;
-          user.position = parseInt(row.position) || 1000;
-          user.refs     = parseInt(row.refs)     || 0;
-          user.movedUp  = parseInt(row.moved_up) || 0;
-          user.total    = parseInt(row.total)    || 1500;
-          user.code     = row.code               || '';
-          user.email    = row.email              || '';
-          if (user.refs > oldRefs) {
-            toast('↑ New referral! You moved up ' + (user.refs - oldRefs) * 10 + ' spots.');
-          }
-          renderDashboard();
-          go('s-success');
-        } else {
-          localStorage.removeItem('phi_session');
+  /* ── Session loader ── */
+  function loadSession(token) {
+    apiGetUser(token).then(function(rows) {
+      if (rows && rows.length > 0) {
+        var row = rows[0];
+        var oldRefs   = user.refs;
+        user.position = parseInt(row.position) || 1000;
+        user.refs     = parseInt(row.refs)     || 0;
+        user.movedUp  = parseInt(row.moved_up) || 0;
+        user.total    = parseInt(row.total)    || 1500;
+        user.code     = row.code               || '';
+        user.email    = row.email              || '';
+        if (user.refs > oldRefs) {
+          toast('↑ New referral! You moved up ' + (user.refs - oldRefs) * 10 + ' spots.');
         }
-      }).catch(function() {
+        renderDashboard();
+        go('s-success');
+      } else {
         localStorage.removeItem('phi_session');
-      });
-    } else {
-      if (refInUrl && isValidCode(refInUrl)) {
-        localStorage.setItem('phi_ref', refInUrl);
       }
+    }).catch(function() {
+      localStorage.removeItem('phi_session');
+    });
+  }
+
+  /* ── On load ── */
+  window.onload = function() {
+    var params       = new URLSearchParams(window.location.search);
+    var verified     = params.get('verified');
+    var sessionParam = params.get('session');
+    var refInUrl     = params.get('ref');
+
+    // Returning from email verification link
+    if (verified === 'success' && sessionParam) {
+      localStorage.setItem('phi_session', sessionParam);
+      window.history.replaceState({}, '', window.location.pathname);
+      toast('Email verified! Welcome to PhiPrep 🎉');
+      loadSession(sessionParam);
+      return;
+    }
+    if (verified === 'already' && sessionParam) {
+      localStorage.setItem('phi_session', sessionParam);
+      window.history.replaceState({}, '', window.location.pathname);
+      toast('Already verified. Welcome back!');
+      loadSession(sessionParam);
+      return;
+    }
+    if (verified === 'invalid') {
+      window.history.replaceState({}, '', window.location.pathname);
+      toast('Verification link is invalid or expired.');
+    }
+
+    // Normal load — restore existing session
+    var sessionToken = localStorage.getItem('phi_session');
+    if (sessionToken) {
+      loadSession(sessionToken);
+      return;
+    }
+
+    // Store referral code for signup
+    if (refInUrl && isValidCode(refInUrl)) {
+      localStorage.setItem('phi_ref', refInUrl);
     }
   };
 
+  /* ── Screen nav ── */
   function go(id) {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
     window.scrollTo(0, 0);
   }
 
+  /* ── Step 1: Email ── */
   function doEmail() {
-    var v = document.getElementById('emailInput').value.trim().toLowerCase();
+    var v   = document.getElementById('emailInput').value.trim().toLowerCase();
     var err = document.getElementById('emailErr');
     var btn = document.getElementById('emailBtn');
 
-    if (!v) { err.textContent = 'Email is required.'; return; }
+    if (!v)               { err.textContent = 'Email is required.'; return; }
     if (!isValidEmail(v)) { err.textContent = 'Enter a valid email address.'; return; }
     if (/\d{4,}/.test(v.split('@')[0])) { err.textContent = 'Enter a real email address.'; return; }
 
-    btn.disabled = true;
+    btn.disabled    = true;
     btn.textContent = 'Checking...';
 
     apiCheckDuplicate(v).then(function(data) {
-      btn.disabled = false;
+      btn.disabled    = false;
       btn.textContent = 'Continue →';
       if (data.exists) {
         err.textContent = 'This email is already on the waitlist.';
@@ -830,7 +856,7 @@
         go('s-exam');
       }
     }).catch(function() {
-      btn.disabled = false;
+      btn.disabled    = false;
       btn.textContent = 'Continue →';
       user.email = v;
       go('s-exam');
@@ -845,6 +871,7 @@
     if (active && active.id === 's-email') doEmail();
   });
 
+  /* ── Step 2: Exam picker ── */
   function pick(group, btn) {
     btn.parentElement.querySelectorAll('.choice-btn').forEach(function(b) { b.classList.remove('selected'); });
     btn.classList.add('selected');
@@ -852,28 +879,24 @@
   }
 
   function doExam() {
-    if (!picked.exam) { toast('Please pick an option'); return; }
+    if (!picked.exam) { toast('Please pick an option to continue.'); return; }
     user.exam = picked.exam;
     go('s-final');
   }
 
-  function doFinalSkip() {
-    toast('Please complete the captcha to join.');
-  }
-
+  /* ── Step 3: AI usage + captcha + join ── */
   function doFinal() {
-    var joinBtn = document.querySelector('#s-final .btn-primary');
-    if (joinBtn.disabled) return;
-    if (signupInProgress) return;
+    var joinBtn = document.getElementById('joinBtn');
+    if (joinBtn.disabled || signupInProgress) return;
 
     var captcha = document.querySelector('[name="cf-turnstile-response"]');
-    var token = captcha ? captcha.value : '';
+    var token   = captcha ? captcha.value : '';
 
-    if (!token) { toast('Please complete the captcha first'); return; }
+    if (!token) { toast('Please complete the captcha first.'); return; }
 
-    joinBtn.disabled = true;
+    joinBtn.disabled    = true;
     joinBtn.textContent = 'Verifying...';
-    signupInProgress = true;
+    signupInProgress    = true;
 
     fetch('/api/verify', {
       method: 'POST',
@@ -888,23 +911,30 @@
         joinBtn.textContent = 'Joining...';
         signup(function(err) {
           signupInProgress = false;
-          if (err) { joinBtn.disabled = false; joinBtn.textContent = 'Join the Waitlist →'; }
+          if (err) {
+            joinBtn.disabled    = false;
+            joinBtn.textContent = 'Join the Waitlist →';
+            resetTurnstile();
+          }
         });
       } else {
-        signupInProgress = false;
-        toast('Captcha failed. Please try again.');
-        joinBtn.disabled = false;
+        signupInProgress    = false;
+        joinBtn.disabled    = false;
         joinBtn.textContent = 'Join the Waitlist →';
+        toast('Captcha failed. Please try again.');
+        resetTurnstile();
       }
     })
     .catch(function() {
-      signupInProgress = false;
-      toast('Connection error. Please try again.');
-      joinBtn.disabled = false;
+      signupInProgress    = false;
+      joinBtn.disabled    = false;
       joinBtn.textContent = 'Join the Waitlist →';
+      toast('Connection error. Please try again.');
+      resetTurnstile();
     });
   }
 
+  /* ── Signup ── */
   function signup(onError) {
     var referrerCode = localStorage.getItem('phi_ref');
     if (referrerCode && !isValidCode(referrerCode)) {
@@ -935,19 +965,19 @@
       moved_up:    0,
       code:        user.code,
       referred_by: referrerCode || 'direct'
-    }).then(function(res) {
-
+    })
+    .then(function(res) {
       if (res.status === 'error') {
         toast('Something went wrong. Please try again.');
         if (onError) onError(true);
         return;
       }
 
-      // store ONLY session token in localStorage
       if (res.session_token) {
         localStorage.setItem('phi_session', res.session_token);
       }
 
+      // Returning user — go straight to dashboard
       if (res.status === 'exists' && res.data) {
         user.position = parseInt(res.data.position) || 1000;
         user.total    = parseInt(res.data.total)    || 1500;
@@ -960,54 +990,70 @@
         return;
       }
 
+      // New user — record position
       if (res.position) {
         user.position = res.position;
-        user.total    = res.total || res.position + 500;
+        user.total    = res.total || res.position + 847;
       }
 
+      // Credit referrer
       if (referrerCode) {
         apiReferral(referrerCode).catch(function() {});
         localStorage.removeItem('phi_ref');
       }
 
-      saveToSheets(safeEmail, safeExam, safeAi, safeProb, user.position, user.code, referrerCode || 'direct');
-      renderDashboard();
-      go('s-success');
-
-    }).catch(function() {
+      // Show verify screen — wait for email confirmation
+      document.getElementById('sentToEmail').textContent = safeEmail;
+      go('s-verify');
+    })
+    .catch(function() {
       toast('Connection error. Please try again.');
       if (onError) onError(true);
     });
   }
 
-  function saveToSheets(email, exam, ai, prob, position, code, referredBy) {
-    var lastSubmit = localStorage.getItem('phi_last_submit');
-    var now = Date.now();
-    if (lastSubmit && (now - parseInt(lastSubmit)) < 60000) return;
-    localStorage.setItem('phi_last_submit', now);
-    fetch('https://script.google.com/macros/s/AKfycbzh230pqnOuXrTJWb7hUf9vMlH_RsWvH6ayG_GbSuS-fXcNJ8rTHcWMgiNx0H2MkAK3/exec', {
+  /* ── Resend verification email ── */
+  function resendVerify() {
+    var btn   = document.getElementById('resendBtn');
+    var email = document.getElementById('sentToEmail').textContent || user.email;
+    if (!email) { toast('No email found. Please go back and try again.'); return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Sending...';
+
+    fetch('/api/resend-verify', {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: 'phiprep_secret_2024',
-        email: email, exam: exam, ai: ai,
-        problem: prob, position: position,
-        code: code, referredBy: referredBy
-      })
-    }).catch(function() {});
+      body: JSON.stringify({ email: email })
+    })
+    .then(function() {
+      toast('Verification email resent! Check your inbox.');
+      setTimeout(function() {
+        btn.disabled    = false;
+        btn.textContent = 'Resend email';
+      }, 60000);
+    })
+    .catch(function() {
+      toast('Could not resend. Please try again.');
+      btn.disabled    = false;
+      btn.textContent = 'Resend email';
+    });
   }
 
+  /* ── Dashboard ── */
   function renderDashboard() {
-    document.getElementById('totalNum').textContent = user.total.toLocaleString();
+    document.getElementById('totalNum').textContent    = user.total.toLocaleString();
     document.getElementById('refLinkText').textContent = getRefUrl();
+
     if (!dashRendered) {
       countDown('posNum', user.position + 400, user.position, '#', 1000);
       dashRendered = true;
     } else {
       document.getElementById('posNum').textContent = '#' + user.position.toLocaleString();
     }
+
     updateMilestones(user.refs);
+
     if (user.movedUp > 0) {
       document.getElementById('movedNum').textContent = user.movedUp;
       document.getElementById('movedBadge').classList.add('visible');
@@ -1020,7 +1066,7 @@
     var start = null;
     function frame(ts) {
       if (!start) start = ts;
-      var p = Math.min((ts - start) / ms, 1);
+      var p     = Math.min((ts - start) / ms, 1);
       var eased = 1 - Math.pow(1 - p, 3);
       el.textContent = prefix + Math.round(from - (from - to) * eased).toLocaleString();
       if (p < 1) requestAnimationFrame(frame);
@@ -1032,30 +1078,33 @@
   function updateMilestones(refs) {
     document.getElementById('refNum').textContent = refs;
     document.getElementById('refBar').style.width = Math.min((refs / 10) * 100, 100) + '%';
+
     var hint = refs < 1  ? '1 referral = 10 spots ahead' :
                refs < 5  ? (5 - refs)  + ' more for beta access' :
                refs < 10 ? (10 - refs) + ' more for 3 months free Pro' :
-                           'All rewards unlocked!';
+                           'All rewards unlocked! 🎉';
     document.getElementById('progressHint').textContent = hint;
+
     document.getElementById('mc1').textContent = Math.min(refs, 1)  + ' / 1';
     document.getElementById('mc2').textContent = Math.min(refs, 5)  + ' / 5';
     document.getElementById('mc3').textContent = Math.min(refs, 10) + ' / 10';
-    if (refs >= 1)  document.getElementById('m1').classList.add('done');
-    if (refs >= 5)  document.getElementById('m2').classList.add('done');
-    if (refs >= 10) document.getElementById('m3').classList.add('done');
-    if (refs < 5)   document.getElementById('m2').classList.remove('done');
-    if (refs < 10)  document.getElementById('m3').classList.remove('done');
+
+    document.getElementById('m1').classList.toggle('done', refs >= 1);
+    document.getElementById('m2').classList.toggle('done', refs >= 5);
+    document.getElementById('m3').classList.toggle('done', refs >= 10);
   }
 
+  /* ── Copy + Share ── */
   function doCopy() {
-    var url = getRefUrl();
+    var url  = getRefUrl();
     var temp = document.createElement('textarea');
     temp.value = url;
     temp.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
     document.body.appendChild(temp);
     temp.focus(); temp.select();
-    document.execCommand('copy');
+    try { document.execCommand('copy'); } catch(e) {}
     document.body.removeChild(temp);
+
     var btn = document.getElementById('copyBtn');
     btn.textContent = 'Copied!';
     btn.classList.add('done');
@@ -1065,22 +1114,30 @@
 
   function doWhatsapp() {
     var url = getRefUrl();
-    window.open('https://wa.me/?text=' + encodeURIComponent('I joined the PhiPrep waitlist — an AI tutor that teaches you HOW to think through JEE problems. Join here: ' + url), '_blank');
+    window.open('https://wa.me/?text=' + encodeURIComponent(
+      'I joined the PhiPrep waitlist — an AI tutor that teaches you HOW to think through JEE problems. Join here: ' + url
+    ), '_blank');
   }
   function doTwitter() {
     var url = getRefUrl();
-    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent('Just joined @PhiPrep — AI tutor for JEE prep. Teaches thinking, not just answers. ' + url), '_blank');
+    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(
+      'Just joined @PhiPrep — AI tutor for JEE prep. Teaches thinking, not just answers. ' + url
+    ), '_blank');
   }
   function doTelegram() {
     var url = getRefUrl();
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Join PhiPrep waitlist for JEE prep'), '_blank');
+    window.open(
+      'https://t.me/share/url?url=' + encodeURIComponent(url) +
+      '&text=' + encodeURIComponent('Join PhiPrep waitlist — AI tutor for JEE prep'),
+    '_blank');
   }
 
+  /* ── Toast ── */
   function toast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(function() { t.classList.remove('show'); }, 3000);
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
   }
 </script>
 </body>
