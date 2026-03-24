@@ -735,9 +735,9 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify({ token: turnstile.getResponse()
-      ;})
+      })
     .then(function(r) { return r.json(); })
-    .then(function(d) { return d.data ? [d.data] : []; });
+    .then(function(d) { return d.data ? [d.data] : [] })
   }
   function apiSignup(data) {
     return fetch('/api/signup', {
