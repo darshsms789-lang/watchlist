@@ -3,70 +3,71 @@ import crypto from 'crypto';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const SB_URL = process.env.SB_URL;
+  const SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
   const SB_KEY = process.env.SUPABASE_KEY;
-  if (!SB_KEY || !SB_URL) return res.status(500).json({ status:'error', message:'Server misconfigured' });
 
-  const headers = { 'Content-Type':'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+  if (!SB_KEY) return res.status(500).json({ status: 'error', message: 'Server config error' });
 
-  const { email, exam, code, referred_by, session_token } = req.body;
-  if (!email || !exam || !session_token) return res.status(400).json({ status:'error', message:'Missing fields' });
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SB_KEY,
+    'Authorization': `Bearer ${SB_KEY}`
+  };
+
+  const body = req.body;
+  const email = (body.email || '').trim().toLowerCase();
+  const exam = body.exam || '';
+  const referred_by = body.referred_by || 'direct';
+
+  if (!email) return res.status(400).json({ status: 'error', message: 'Email required' });
 
   try {
-    // 1. Check duplicate
-    const dupRes = await fetch(`${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}`, { headers });
-    const dupData = await dupRes.json();
-    if (dupData.length > 0) return res.status(200).json({ status:'exists', data: dupData[0] });
+    // Check duplicate again
+    const dupRes = await fetch(`${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}&select=*`, { headers });
+    if (!dupRes.ok) return res.status(500).json({ status:'error', message:'Supabase fetch failed' });
+    const dup = await dupRes.json();
+    if (dup.length > 0) return res.status(200).json({ status:'exists', data: dup[0] });
 
-    // 2. Get total users
+    // Get current total users (for ranking)
     const countRes = await fetch(`${SB_URL}/rest/v1/counter?id=eq.total_users&select=value`, { headers });
+    if (!countRes.ok) return res.status(500).json({ status:'error', message:'Supabase fetch failed' });
     const countData = await countRes.json();
-    const totalUsers = countData?.[0]?.value ? parseInt(countData[0].value) : 0;
+    const totalUsers = countData[0] ? parseInt(countData[0].value) : 0;
 
-    let position = 1000 + totalUsers; // dynamic rank
-    const userCode = code || crypto.randomBytes(4).toString('hex');
-    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const position = totalUsers + 1; // rank increments automatically
+    const code = crypto.randomBytes(4).toString('hex');
+    const session_token = crypto.randomBytes(32).toString('hex');
 
-    // 3. Insert user
-    const insert = {
-      email: email.toLowerCase(),
-      exam,
-      position,
+    // Insert new user
+    const insertData = {
+      email, exam, referred_by, position,
       total: position + 500,
-      refs: 0,
-      moved_up: 0,
-      verified: true, // Mark verified after captcha
-      code: userCode,
-      referred_by: referred_by || 'direct',
-      session_token: sessionToken
+      refs: 0, moved_up: 0, code, session_token
     };
+
     const insertRes = await fetch(`${SB_URL}/rest/v1/waitlist`, {
       method: 'POST',
       headers: { ...headers, 'Prefer':'return=minimal' },
-      body: JSON.stringify(insert)
+      body: JSON.stringify(insertData)
     });
-    if (!insertRes.ok) throw new Error('Insert failed');
 
-    // 4. Increment counter
+    if (!insertRes.ok) {
+      const txt = await insertRes.text();
+      console.error('Supabase insert failed:', txt);
+      return res.status(500).json({ status:'error', message:'Insert failed' });
+    }
+
+    // Update global counter
     await fetch(`${SB_URL}/rest/v1/counter?id=eq.total_users`, {
       method: 'PATCH',
       headers: { ...headers, 'Prefer':'return=minimal' },
       body: JSON.stringify({ value: totalUsers + 1 })
     });
 
-    // 5. Credit referral if applicable
-    if (referred_by && referred_by !== 'direct') {
-      await fetch(`${SB_URL}/api/referral`, {
-        method:'POST',
-        headers:{ ...headers, 'Content-Type':'application/json' },
-        body: JSON.stringify({ referral_code: referred_by })
-      });
-    }
+    return res.status(200).json({ status:'success', position, total: position + 500, code, session_token });
 
-    return res.status(200).json({ status:'success', position, total: position + 500, code: userCode, session_token: sessionToken });
-
-  } catch (err) {
-    console.error('Signup Error:', err);
-    return res.status(500).json({ status:'error', message:'Server error' });
+  } catch(err) {
+    console.error('Signup error:', err);
+    return res.status(500).json({ status:'error', message:'Internal server error' });
   }
 }
