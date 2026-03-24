@@ -1,6 +1,4 @@
 // /api/checkduplicate.js
-import fetch from 'node-fetch';
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -18,10 +16,16 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`  // your env variable
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
       },
       body: JSON.stringify({ email: email.trim() })
     });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('Resend API error:', text);
+      return res.status(500).json({ exists: false, error: 'Verification failed' });
+    }
 
     const data = await response.json();
 
@@ -29,7 +33,7 @@ export default async function handler(req, res) {
     let exists = false;
     if (data.status === 'valid') exists = true;
     if (data.status === 'invalid') exists = false;
-    if (data.status === 'unknown') exists = false; // or handle specially
+    if (data.status === 'unknown') exists = false;
 
     return res.status(200).json({ exists, raw: data });
   } catch (err) {
