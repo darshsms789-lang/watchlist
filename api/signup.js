@@ -1,14 +1,19 @@
 import crypto from 'crypto';
+import dns from 'dns';
+import { promisify } from 'util';
 
-var WAITLIST_BASE = 847;
+var resolveMx = promisify(dns.resolveMx);
 
 export default async function handler(req, res) {
+
   if (req.method !== 'POST') return res.status(405).end();
 
-  var SB_URL     = 'https://zuidgbvnyonyxzfsepox.supabase.co';
-  var SB_KEY     = process.env.SUPABASE_KEY;
+  var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
+  var SB_KEY = process.env.SUPABASE_KEY;
 
-  if (!SB_KEY) return res.status(500).json({ status: 'error', message: 'Missing API Key' });
+  if (!SB_KEY) {
+    return res.status(500).json({ status: 'error', message: 'Missing SUPABASE_KEY' });
+  }
 
   var headers = {
     'Content-Type': 'application/json',
@@ -17,45 +22,86 @@ export default async function handler(req, res) {
   };
 
   var body = req.body;
-  if (!body || !body.email) return res.status(400).json({ status: 'error', message: 'No email' });
+
+  if (!body || !body.email) {
+    return res.status(400).json({ status: 'error', message: 'No email' });
+  }
+
+  // strict email format check
+  var emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(body.email)) {
+    return res.status(400).json({ status: 'error', message: 'Invalid email format' });
+  }
+
+  // block spam patterns
+  if (/\d{4,}/.test(body.email.split('@')[0])) {
+    return res.status(400).json({ status: 'error', message: 'Invalid email' });
+  }
+
+  // check email domain has real MX records
+  try {
+    var domain = body.email.split('@')[1];
+    var mx = await resolveMx(domain);
+    if (!mx || mx.length === 0) {
+      return res.status(400).json({ status: 'error', message: 'Email domain does not exist' });
+    }
+  } catch (e) {
+    return res.status(400).json({ status: 'error', message: 'Email domain invalid' });
+  }
 
   try {
-    // 1. Check for existing user
-    var check = await fetch(SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(body.email) + '&select=*', { headers });
+
+    // check duplicate
+    var check = await fetch(
+      SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(body.email) + '&select=*',
+      { headers: headers }
+    );
     var existing = await check.json();
 
     if (existing && existing.length > 0) {
+      var returnToken = crypto.randomBytes(32).toString('hex');
+      await fetch(
+        SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(body.email),
+        {
+          method: 'PATCH',
+          headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
+          body: JSON.stringify({ session_token: returnToken })
+        }
+      );
       return res.status(200).json({
-        status: 'exists',
-        session_token: existing[0].session_token, // Critical for persistence
-        data: Object.assign({}, existing[0], { total: WAITLIST_BASE + (parseInt(existing[0].position) || 1000) })
+        status:        'exists',
+        session_token: returnToken,
+        data:          existing[0]
       });
     }
 
-    // 2. Get current counter
-    var countRes = await fetch(SB_URL + '/rest/v1/counter?id=eq.total_users&select=value', { headers });
+    // get total users for position
+    var countRes = await fetch(
+      SB_URL + '/rest/v1/counter?id=eq.total_users&select=value',
+      { headers: headers }
+    );
     var countData = await countRes.json();
     var totalUsers = (countData && countData[0]) ? parseInt(countData[0].value) : 0;
 
-    // 3. Calculate Position
     var position = 1000 + totalUsers;
-    var sessionToken = crypto.randomBytes(32).toString('hex');
-    var userCode = body.code || ('PHI' + Math.floor(Math.random()*9000));
+    if (body.referred_by && body.referred_by !== 'direct') {
+      position = Math.max(1000, position - 5);
+    }
 
-    // 4. Insert New User
+    var sessionToken = crypto.randomBytes(32).toString('hex');
+
     var insertData = {
-      email: body.email,
-      exam: body.exam || '',
-      ai_usage: body.ai_usage || '',
-      problem: body.problem || '',
-      position: position,
-      total: WAITLIST_BASE + position,
-      refs: 0,
-      moved_up: 0,
-      code: userCode,
-      referred_by: body.referred_by || 'direct',
-      session_token: sessionToken,
-      email_verified: true
+      email:         body.email,
+      exam:          body.exam        || '',
+      ai_usage:      body.ai_usage    || '',
+      problem:       body.problem     || '',
+      position:      position,
+      total:         position + 500,
+      refs:          0,
+      moved_up:      0,
+      code:          body.code        || '',
+      referred_by:   body.referred_by || 'direct',
+      session_token: sessionToken
     };
 
     var insert = await fetch(SB_URL + '/rest/v1/waitlist', {
@@ -65,32 +111,26 @@ export default async function handler(req, res) {
     });
 
     if (insert.ok || insert.status === 201) {
-      // A. Increment Global Counter
       await fetch(SB_URL + '/rest/v1/counter?id=eq.total_users', {
         method: 'PATCH',
-        headers: headers,
+        headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
         body: JSON.stringify({ value: totalUsers + 1 })
       });
 
-      // B. THE REFERRAL TRIGGER: Move the referrer up 10 spots
-      if (body.referred_by && body.referred_by !== 'direct') {
-        await fetch(SB_URL + '/rest/v1/rpc/increment_referral', {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify({ user_code: body.referred_by })
-        }).catch(e => console.error("Referral RPC failed", e));
-      }
-
       return res.status(200).json({
-        status: 'success',
+        status:        'success',
         session_token: sessionToken,
-        position: position,
-        total: WAITLIST_BASE + position
+        position:      position,
+        total:         position + 500
       });
+    } else {
+      var errText = await insert.text();
+      console.error('Insert error:', errText);
+      return res.status(200).json({ status: 'error', message: 'Insert failed' });
     }
-    return res.status(500).json({ status: 'error', message: 'DB Write Failed' });
 
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: err.message });
+    console.error('Signup error:', err);
+    return res.status(200).json({ status: 'error', message: err.message });
   }
 }
