@@ -4,7 +4,6 @@ export default async function handler(req, res) {
 
   var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
   var SB_KEY = process.env.SUPABASE_KEY;
-
   if (!SB_KEY) return res.status(500).json({ status: 'error' });
 
   var headers = {
@@ -13,8 +12,7 @@ export default async function handler(req, res) {
     'Authorization': 'Bearer ' + SB_KEY
   };
 
-  var code = req.body.code;
-
+  var code = req.body && req.body.code;
   if (!code || !/^[a-zA-Z0-9]{6,30}$/.test(code)) {
     return res.status(400).json({ status: 'invalid code' });
   }
@@ -32,7 +30,7 @@ export default async function handler(req, res) {
 
     var ref      = rows[0];
     var newRefs  = (parseInt(ref.refs)     || 0) + 1;
-    var newPos   = Math.max(1, (parseInt(ref.position) || 1000) - 10);
+    var newPos   = Math.max(1, (parseInt(ref.position) || 1000) - 10); // 1 referral = 10 spots
     var newMoved = (parseInt(ref.moved_up) || 0) + 10;
 
     await fetch(SB_URL + '/rest/v1/waitlist?code=eq.' + code, {
@@ -45,7 +43,7 @@ export default async function handler(req, res) {
       })
     });
 
-    return res.status(200).json({ status: 'credited' });
+    return res.status(200).json({ status: 'credited', newPosition: newPos });
 
   } catch (err) {
     console.error('Referral error:', err);
