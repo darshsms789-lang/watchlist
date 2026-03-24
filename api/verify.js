@@ -1,23 +1,20 @@
 export default async function handler(req, res) {
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return res.status(405).end();
+
+  var token = req.body.token;
+
+  if (!token) {
+    return res.status(400).json({ success: false, error: 'No token' });
+  }
+
+  var secret = process.env.TURNSTILE_SECRET;
+
+  if (!secret) {
+    return res.status(500).json({ success: false, error: 'Secret missing' });
   }
 
   try {
-
-    var token = req.body.token;
-
-    if (!token) {
-      return res.status(400).json({ success: false, error: 'No captcha token' });
-    }
-
-    var secret = process.env.TURNSTILE_SECRET;
-
-    if (!secret) {
-      return res.status(500).json({ success: false, error: 'Secret missing' });
-    }
-
     var body = new URLSearchParams();
     body.append('secret', secret);
     body.append('response', token);
@@ -39,9 +36,8 @@ export default async function handler(req, res) {
 
     return res.status(403).json({ success: false, error: 'Captcha failed' });
 
-  } catch (error) {
-    console.error('Verify error:', error);
+  } catch (err) {
+    console.error('Verify error:', err);
     return res.status(500).json({ success: false, error: 'Server error' });
   }
-
 }
