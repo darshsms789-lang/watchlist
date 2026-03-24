@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   var SB_KEY = process.env.SUPABASE_KEY;
 
   if (!SB_KEY) {
-    return res.status(500).json({ status: 'error', message: 'Missing SUPABASE_KEY' });
+    return res.status(500).json({ status: 'error' });
   }
 
   var headers = {
@@ -21,8 +21,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // fetch by session token — not by email
-    // this means email is never exposed in frontend requests
     var response = await fetch(
       SB_URL + '/rest/v1/waitlist?session_token=eq.' + sessionToken + '&select=*',
       { headers: headers }
@@ -32,7 +30,6 @@ export default async function handler(req, res) {
 
     if (rows && rows.length > 0) {
       var row = rows[0];
-      // never send session_token back to frontend
       delete row.session_token;
       return res.status(200).json({ status: 'found', data: row });
     }
