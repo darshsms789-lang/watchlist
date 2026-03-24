@@ -12,8 +12,7 @@ async function isDomainReal(email) {
     ]);
     return mxRecords && mxRecords.length > 0;
   } catch (err) {
-    if (err.message === 'timeout') return true;
-    return false;
+    return err.message === 'timeout' ? true : false;
   }
 }
 
@@ -22,27 +21,36 @@ export default async function handler(req, res) {
 
   const SB_URL = process.env.SB_URL;
   const SB_KEY = process.env.SUPABASE_KEY;
-  if (!SB_KEY) return res.status(500).json({ status:'error', message:'Server misconfigured' });
+  if (!SB_KEY || !SB_URL) return res.status(500).json({ status: 'error', message: 'Server misconfigured' });
 
   const { email } = req.body;
-  if (!email) return res.status(400).json({ status:'error', message:'Email required' });
+  if (!email) return res.status(400).json({ status: 'error', message: 'Email required' });
 
-  const cleanEmail = email.toLowerCase().trim();
-  const regex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-  if (!regex.test(cleanEmail) || /\d{4,}/.test(cleanEmail.split('@')[0])) {
-    return res.status(400).json({ status:'error', message:'Invalid email' });
+  const e = email.toLowerCase().trim();
+
+  // Format check
+  if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(e)) {
+    return res.status(400).json({ status: 'error', message: 'Invalid email format.' });
   }
 
-  const validDomain = await isDomainReal(cleanEmail);
-  if (!validDomain) return res.status(400).json({ status:'error', message:'Email domain does not exist' });
+  // Block spam patterns
+  if (/\d{4,}/.test(e.split('@')[0])) {
+    return res.status(400).json({ status: 'error', message: 'Use a real email address.' });
+  }
 
-  // Check if already exists
-  const check = await fetch(`${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(cleanEmail)}&select=*`, {
-    headers:{ 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type':'application/json' }
-  });
-  const existing = await check.json();
-  if (existing.length > 0) return res.status(200).json({ exists: true });
+  // Check domain
+  const domainValid = await isDomainReal(e);
+  if (!domainValid) return res.status(400).json({ status: 'error', message: 'Email domain does not exist.' });
 
-  // Everything OK
-  return res.status(200).json({ exists: false, status:'success' });
+  // Check duplicate
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(e)}&select=*`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    const existing = await r.json();
+    return res.status(200).json({ exists: existing.length > 0 });
+  } catch (err) {
+    console.error('CheckDuplicate Error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error' });
+  }
 }
