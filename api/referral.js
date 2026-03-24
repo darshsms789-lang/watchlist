@@ -1,36 +1,54 @@
 export default async function handler(req, res) {
+
   if (req.method !== 'POST') return res.status(405).end();
 
-  const SB_URL = process.env.SB_URL;
-  const SB_KEY = process.env.SUPABASE_KEY;
-  if (!SB_KEY || !SB_URL) return res.status(500).json({ status:'error' });
+  var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
+  var SB_KEY = process.env.SUPABASE_KEY;
 
-  const { referral_code } = req.body;
-  if (!referral_code) return res.status(400).json({ status:'invalid' });
+  if (!SB_KEY) return res.status(500).json({ status: 'error' });
 
-  const headers = { 'Content-Type':'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+  var headers = {
+    'Content-Type': 'application/json',
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY
+  };
+
+  var code = req.body.code;
+
+  if (!code || !/^[a-zA-Z0-9]{6,30}$/.test(code)) {
+    return res.status(400).json({ status: 'invalid code' });
+  }
 
   try {
-    const r = await fetch(`${SB_URL}/rest/v1/waitlist?code=eq.${referral_code}`, { headers });
-    const data = await r.json();
-    if (!data?.length) return res.status(404).json({ status:'not found' });
+    var get = await fetch(
+      SB_URL + '/rest/v1/waitlist?code=eq.' + code + '&select=*',
+      { headers: headers }
+    );
+    var rows = await get.json();
 
-    const ref = data[0];
-    if (!ref.verified) return res.status(403).json({ status:'error', message:'Referrer not verified' });
+    if (!rows || rows.length === 0) {
+      return res.status(200).json({ status: 'not found' });
+    }
 
-    const newRefs = (parseInt(ref.refs) || 0) + 1;
-    const newMoved = (parseInt(ref.moved_up) || 0) + 10;
-    const newPosition = Math.max(1, (parseInt(ref.position) || 1000) - 10);
+    var ref      = rows[0];
+    var newRefs  = (parseInt(ref.refs)     || 0) + 1;
+    var newPos   = Math.max(1, (parseInt(ref.position) || 1000) - 10);
+    var newMoved = (parseInt(ref.moved_up) || 0) + 10;
 
-    await fetch(`${SB_URL}/rest/v1/waitlist?code=eq.${referral_code}`, {
-      method:'PATCH',
-      headers:{ ...headers, 'Prefer':'return=minimal' },
-      body: JSON.stringify({ refs:newRefs, moved_up:newMoved, position:newPosition })
+    await fetch(SB_URL + '/rest/v1/waitlist?code=eq.' + code, {
+      method: 'PATCH',
+      headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({
+        refs:     newRefs,
+        position: newPos,
+        moved_up: newMoved
+      })
     });
 
-    return res.status(200).json({ status:'credited', refs:newRefs, moved_up:newMoved, position:newPosition });
+    return res.status(200).json({ status: 'credited' });
+
   } catch (err) {
-    console.error('Referral Error:', err);
-    return res.status(500).json({ status:'error' });
+    console.error('Referral error:', err);
+    return res.status(500).json({ status: 'error' });
   }
 }
