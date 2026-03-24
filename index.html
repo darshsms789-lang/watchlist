@@ -808,17 +808,58 @@
     window.scrollTo(0, 0);
   }
 
-  function doEmail() {
-    var v = document.getElementById('emailInput').value.trim().toLowerCase();
-    var err = document.getElementById('emailErr');
-    var btn = document.getElementById('emailBtn');
+ async function doEmail() {
+  var v = document.getElementById('emailInput').value.trim().toLowerCase();
+  var err = document.getElementById('emailErr');
+  var btn = document.getElementById('emailBtn');
 
-    if (!v) { err.textContent = 'Email is required.'; return; }
-    if (!isValidEmail(v)) { err.textContent = 'Enter a valid email address.'; return; }
-    if (/\d{4,}/.test(v.split('@')[0])) { err.textContent = 'Enter a real email address.'; return; }
+  if (!v) { err.textContent = 'Email is required.'; return; }
+  if (!isValidEmail(v)) { err.textContent = 'Enter a valid email address.'; return; }
+  if (/\d{4,}/.test(v.split('@')[0])) { err.textContent = 'Enter a real email address.'; return; }
 
-    btn.disabled = true;
-    btn.textContent = 'Checking...';
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+
+  try {
+    // 1️⃣ Check duplicate first
+    const dupData = await apiCheckDuplicate(v);
+    if (dupData.exists) {
+      btn.disabled = false;
+      btn.textContent = 'Continue →';
+      err.textContent = 'This email is already on the waitlist.';
+      return;
+    }
+
+    // 2️⃣ Call Resend API for real mailbox check
+    const resp = await fetch('https://api.resend.com/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + YOUR_RESEND_API_KEY
+      },
+      body: JSON.stringify({ email: v })
+    });
+    const data = await resp.json();
+
+    btn.disabled = false;
+    btn.textContent = 'Continue →';
+
+    if (!data.valid) {
+      err.textContent = 'Mailbox does not exist or cannot receive emails.';
+      return;
+    }
+
+    // ✅ Everything passed
+    user.email = v;
+    go('s-exam');
+
+  } catch (e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = 'Continue →';
+    err.textContent = 'Error checking email. Try again.';
+  }
+}
 
     apiCheckDuplicate(v).then(function(data) {
       btn.disabled = false;
