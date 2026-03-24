@@ -1,52 +1,53 @@
 import crypto from 'crypto';
 
-const SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
-const SB_KEY = process.env.SUPABASE_KEY;
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
-  if (!SB_KEY) return res.status(500).json({ status: 'error', message: 'Server misconfigured' });
 
-  const headers = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+  const SB_URL = process.env.SB_URL;
+  const SB_KEY = process.env.SUPABASE_KEY;
+  const headers = { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type':'application/json' };
+  const { email, exam, referred_by, captcha_token } = req.body;
 
-  try {
-    const { email, exam, referred_by } = req.body;
-    if (!email) return res.status(400).json({ status: 'error', message: 'Email required' });
+  if (!email || !exam || !captcha_token) return res.status(400).json({ status:'error', message:'Missing fields' });
 
-    const cleanEmail = email.toLowerCase().trim();
+  // 1️⃣ Verify captcha
+  const captchaRes = await fetch(`${process.env.BASE_URL}/api/verify-captcha`, {
+    method:'POST', body: JSON.stringify({ token: captcha_token }), headers
+  });
+  const captchaData = await captchaRes.json();
+  if (!captchaData.success) return res.status(403).json({ status:'error', message:'Captcha failed' });
 
-    // 1️⃣ Check duplicates
-    const checkRes = await fetch(`${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(cleanEmail)}&select=*`, { headers });
-    const existing = await checkRes.json();
-    if (existing && existing.length > 0) return res.status(200).json({ exists: true });
+  // 2️⃣ Check if verified
+  const userCheck = await fetch(`${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}&select=*`, { headers });
+  const users = await userCheck.json();
+  if (!users[0]?.verified) return res.status(403).json({ status:'error', message:'Email not verified' });
 
-    // 2️⃣ Determine dynamic position
-    const waitlistRes = await fetch(`${SB_URL}/rest/v1/waitlist?select=id,email&order=created_at.asc`, { headers });
-    const waitlist = await waitlistRes.json();
-    const position = waitlist.length + 1;
+  // 3️⃣ Already signed up?
+  if (users[0].position) return res.status(200).json({ status:'exists', position: users[0].position });
 
-    // 3️⃣ Generate code & session token
-    const userCode = cleanEmail.split('@')[0].replace(/[^a-z0-9]/gi, '') + Math.floor(1000 + Math.random() * 9000);
-    const sessionToken = crypto.randomBytes(32).toString('hex');
+  // 4️⃣ Compute position
+  const countRes = await fetch(`${SB_URL}/rest/v1/counter?id=eq.total_users&select=value`, { headers });
+  const countData = await countRes.json();
+  const totalUsers = parseInt(countData[0]?.value || 0);
+  const position = 1000 + totalUsers;
 
-    const insertData = {
-      email: cleanEmail,
-      exam: exam || '',
-      position,
-      total: position,
-      refs: 0,
-      moved_up: 0,
-      code: userCode,
-      referred_by: referred_by || 'direct',
-      session_token: sessionToken
-    };
+  // 5️⃣ Update waitlist
+  const sessionToken = crypto.randomBytes(32).toString('hex');
+  const code = crypto.randomBytes(4).toString('hex');
 
-    const insertRes = await fetch(`${SB_URL}/rest/v1/waitlist`, { method: 'POST', headers: { ...headers, 'Prefer': 'return=minimal' }, body: JSON.stringify(insertData) });
-    if (!insertRes.ok && insertRes.status !== 201) return res.status(500).json({ status: 'error', message: 'Failed to insert user' });
+  await fetch(`${SB_URL}/rest/v1/waitlist`, {
+    method:'PATCH',
+    headers: { ...headers, 'Prefer':'return=minimal' },
+    body: JSON.stringify({
+      position, code, session_token: sessionToken, exam, referred_by: referred_by||'direct'
+    })
+  });
 
-    return res.status(200).json({ status: 'success', position, total: position, code: userCode, session_token: sessionToken });
-  } catch (err) {
-    console.error('signup error:', err);
-    return res.status(500).json({ status: 'error', message: 'Internal server error' });
-  }
+  // 6️⃣ Increment counter
+  await fetch(`${SB_URL}/rest/v1/counter?id=eq.total_users`, {
+    method:'PATCH', headers:{ ...headers, 'Prefer':'return=minimal' },
+    body: JSON.stringify({ value: totalUsers + 1 })
+  });
+
+  return res.status(200).json({ status:'success', position, session_token: sessionToken });
 }
