@@ -54,7 +54,6 @@
     .btn-primary:hover { background: var(--accent2); }
     .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
     
-    /* Dashboard Styles */
     .success-header { text-align: center; padding: 30px 20px; border-bottom: 1px solid var(--border); }
     .position-number { font-family: 'Playfair Display', serif; font-size: 4rem; font-weight: 700; color: var(--text); }
     .section-block { padding: 20px 24px; border-bottom: 1px solid var(--border); }
@@ -103,7 +102,7 @@
         <button class="choice-btn" onclick="pick('exam',this)">NEET</button>
         <button class="choice-btn" onclick="pick('exam',this)">Class 11/12 Boards</button>
       </div>
-      <button class="btn-primary" onclick="go('s-final')">Continue →</button>
+      <button class="btn-primary" onclick="checkExamSelection()">Continue →</button>
     </div>
 
     <div class="screen" id="s-final">
@@ -162,7 +161,11 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  // ENHANCED: doEmail handles the "Your email is invalid" message from backend
+  function checkExamSelection() {
+    if (!picked.exam) { alert('Please select an exam to continue.'); return; }
+    go('s-final');
+  }
+
   function doEmail() {
     var v = document.getElementById('emailInput').value.trim().toLowerCase();
     var err = document.getElementById('emailErr');
@@ -187,12 +190,16 @@
       btn.disabled = false;
       btn.textContent = 'Continue →';
       
+      // Case 1: Backend flagged it as fake/invalid domain
       if (data.status === 'error') {
-        // This shows the "Your email is invalid..." message from the backend
         err.textContent = data.message; 
-      } else if (data.exists) {
-        err.textContent = 'This email is already on the list.';
-      } else {
+      } 
+      // Case 2: User is already in the database
+      else if (data.exists === true) {
+        err.textContent = 'This email is already in the list.';
+      } 
+      // Case 3: Success
+      else {
         user.email = v;
         go('s-exam');
       }
@@ -206,14 +213,14 @@
 
   function doFinal() {
     var btn = document.getElementById('finalBtn');
-    var turnstileResponse = document.querySelector('[name="cf-turnstile-response"]').value;
+    var turnstileElem = document.querySelector('[name="cf-turnstile-response"]');
+    var turnstileResponse = turnstileElem ? turnstileElem.value : '';
     
     if (!turnstileResponse) { alert('Please complete the captcha'); return; }
     
     btn.disabled = true;
     btn.textContent = 'Joining...';
     
-    // Generate a quick referral code
     user.code = user.email.split('@')[0].replace(/[^a-z0-9]/g, '') + Math.floor(1000 + Math.random() * 9000);
     
     fetch('/api/signup', {
@@ -229,15 +236,18 @@
     .then(r => r.json())
     .then(res => {
       if (res.status === 'success' || res.status === 'exists') {
-        user.position = res.position;
-        user.total = res.total;
-        document.getElementById('posNum').textContent = '#' + res.position;
-        document.getElementById('totalNum').textContent = res.total;
+        user.position = res.position || (res.data ? res.data.position : '—');
+        user.total = res.total || (res.data ? res.data.total : '—');
+        user.code = res.code || (res.data ? res.data.code : user.code);
+        
+        document.getElementById('posNum').textContent = '#' + user.position;
+        document.getElementById('totalNum').textContent = user.total;
         document.getElementById('refLinkText').textContent = window.location.origin + '/?ref=' + user.code;
         go('s-success');
       } else {
         alert('Signup failed: ' + res.message);
         btn.disabled = false;
+        btn.textContent = 'Complete Signup →';
       }
     });
   }
@@ -256,7 +266,6 @@
     window.open('https://wa.me/?text=' + encodeURIComponent('Join the PhiPrep waitlist with me: ' + link));
   }
 
-  // Handle Referral from URL
   window.onload = function() {
     var params = new URLSearchParams(window.location.search);
     if (params.get('ref')) {
@@ -264,6 +273,5 @@
     }
   }
 </script>
-
 </body>
 </html>
