@@ -1,43 +1,33 @@
 export default async function handler(req, res) {
-
   if (req.method !== 'POST') return res.status(405).end();
 
-  var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
-  var SB_KEY = process.env.SUPABASE_KEY;
+  const SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
+  const SB_KEY = process.env.SUPABASE_KEY;
+  if (!SB_KEY) return res.status(500).json({ status: 'error', message: 'Server misconfigured' });
 
-  if (!SB_KEY) {
-    return res.status(500).json({ status: 'error' });
-  }
+  const headers = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` };
+  const { session_token } = req.body;
 
-  var headers = {
-    'apikey': SB_KEY,
-    'Authorization': 'Bearer ' + SB_KEY
-  };
-
-  var sessionToken = req.body.session_token;
-
-  if (!sessionToken) {
-    return res.status(400).json({ status: 'error', message: 'No session token' });
-  }
+  if (!session_token) return res.status(400).json({ status: 'error', message: 'No session token' });
 
   try {
-    var response = await fetch(
-      SB_URL + '/rest/v1/waitlist?session_token=eq.' + sessionToken + '&select=*',
-      { headers: headers }
-    );
+    const resUser = await fetch(`${SB_URL}/rest/v1/waitlist?session_token=eq.${encodeURIComponent(session_token)}&select=*`, { headers });
+    const rows = await resUser.json();
+    if (!rows || rows.length === 0) return res.status(200).json({ status: 'not found', data: null });
 
-    var rows = await response.json();
+    const user = rows[0];
+    delete user.session_token;
 
-    if (rows && rows.length > 0) {
-      var row = rows[0];
-      delete row.session_token;
-      return res.status(200).json({ status: 'found', data: row });
-    }
+    // Dynamic position
+    const waitlistRes = await fetch(`${SB_URL}/rest/v1/waitlist?select=email,position&order=created_at.asc`, { headers });
+    const waitlist = await waitlistRes.json();
+    const dynamicPosition = waitlist.findIndex(u => u.email === user.email) + 1 || user.position;
+    user.position = dynamicPosition;
 
-    return res.status(200).json({ status: 'not found', data: null });
+    return res.status(200).json({ status: 'found', data: user });
 
   } catch (err) {
     console.error('getuser error:', err);
-    return res.status(500).json({ status: 'error' });
+    return res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 }
