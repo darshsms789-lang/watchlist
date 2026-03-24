@@ -815,7 +815,7 @@
 
     if (!v) { err.textContent = 'Email is required.'; return; }
     if (!isValidEmail(v)) { err.textContent = 'Enter a valid email address.'; return; }
-    if (/\d{4,}/.test(v.split('@')[0])) { err.textContent = 'Enter a real email address.'; return; }
+   
 
     btn.disabled = true;
     btn.textContent = 'Checking...';
