@@ -1,28 +1,39 @@
+// /api/checkduplicate.js
+import fetch from 'node-fetch';
+
 export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-  if (req.method !== 'POST') return res.status(405).end();
+  const { email } = req.body;
 
-  var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
-  var SB_KEY = process.env.SUPABASE_KEY;
-
-  if (!SB_KEY) return res.status(200).json({ exists: false });
-
-  var email = req.body.email;
-  if (!email) return res.status(400).json({ exists: false });
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ error: 'Email required' });
+  }
 
   try {
-    var response = await fetch(
-      SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(email) + '&select=email',
-      {
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': 'Bearer ' + SB_KEY
-        }
-      }
-    );
-    var rows = await response.json();
-    return res.status(200).json({ exists: rows && rows.length > 0 });
-  } catch (e) {
-    return res.status(200).json({ exists: false });
+    // Call Resend email verification API
+    const response = await fetch('https://api.resend.com/email/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`  // your env variable
+      },
+      body: JSON.stringify({ email: email.trim() })
+    });
+
+    const data = await response.json();
+
+    // data.status might be: 'valid', 'invalid', 'unknown'
+    let exists = false;
+    if (data.status === 'valid') exists = true;
+    if (data.status === 'invalid') exists = false;
+    if (data.status === 'unknown') exists = false; // or handle specially
+
+    return res.status(200).json({ exists, raw: data });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ exists: false, error: 'Verification failed' });
   }
 }
