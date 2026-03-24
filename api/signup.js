@@ -1,136 +1,111 @@
 import crypto from 'crypto';
-import dns from 'dns';
-import { promisify } from 'util';
-
-var resolveMx = promisify(dns.resolveMx);
 
 export default async function handler(req, res) {
-
+  // 1. Only allow POST
   if (req.method !== 'POST') return res.status(405).end();
 
-  var SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
-  var SB_KEY = process.env.SUPABASE_KEY;
+  const SB_URL = 'https://zuidgbvnyonyxzfsepox.supabase.co';
+  const SB_KEY = process.env.SUPABASE_KEY;
 
   if (!SB_KEY) {
-    return res.status(500).json({ status: 'error', message: 'Missing SUPABASE_KEY' });
+    console.error("CRITICAL: Missing SUPABASE_KEY in environment variables.");
+    return res.status(500).json({ status: 'error', message: 'Server configuration error' });
   }
 
-  var headers = {
+  const headers = {
     'Content-Type': 'application/json',
     'apikey': SB_KEY,
     'Authorization': 'Bearer ' + SB_KEY
   };
 
-  var body = req.body;
-
-  if (!body || !body.email) {
-    return res.status(400).json({ status: 'error', message: 'No email' });
-  }
-
-  // strict email format check
-  var emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-  if (!emailRegex.test(body.email)) {
-    return res.status(400).json({ status: 'error', message: 'Invalid email format' });
-  }
-
-  // block spam patterns
-  if (/\d{4,}/.test(body.email.split('@')[0])) {
-    return res.status(400).json({ status: 'error', message: 'Invalid email' });
-  }
-
-  // check email domain has real MX records
   try {
-    var domain = body.email.split('@')[1];
-    var mx = await resolveMx(domain);
-    if (!mx || mx.length === 0) {
-      return res.status(400).json({ status: 'error', message: 'Email domain does not exist' });
+    const body = req.body;
+    if (!body || !body.email) {
+      return res.status(400).json({ status: 'error', message: 'Email is required' });
     }
-  } catch (e) {
-    return res.status(400).json({ status: 'error', message: 'Email domain invalid' });
-  }
 
-  try {
+    const email = body.email.toLowerCase().trim();
 
-    // check duplicate
-    var check = await fetch(
-      SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(body.email) + '&select=*',
-      { headers: headers }
+    // 2. Validation (Simplified for better reliability)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ status: 'error', message: 'Invalid email format' });
+    }
+
+    // 3. Check Duplicate in Supabase
+    const checkRes = await fetch(
+      `${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}&select=*`,
+      { headers }
     );
-    var existing = await check.json();
+    const existing = await checkRes.json();
 
     if (existing && existing.length > 0) {
-      var returnToken = crypto.randomBytes(32).toString('hex');
-      await fetch(
-        SB_URL + '/rest/v1/waitlist?email=eq.' + encodeURIComponent(body.email),
-        {
-          method: 'PATCH',
-          headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
-          body: JSON.stringify({ session_token: returnToken })
-        }
-      );
+      const returnToken = crypto.randomBytes(32).toString('hex');
+      // Update session token for existing user
+      await fetch(`${SB_URL}/rest/v1/waitlist?email=eq.${encodeURIComponent(email)}`, {
+        method: 'PATCH',
+        headers: { ...headers, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ session_token: returnToken })
+      });
+
       return res.status(200).json({
-        status:        'exists',
+        status: 'exists',
         session_token: returnToken,
-        data:          existing[0]
+        data: existing[0]
       });
     }
 
-    // get total users for position
-    var countRes = await fetch(
-      SB_URL + '/rest/v1/counter?id=eq.total_users&select=value',
-      { headers: headers }
-    );
-    var countData = await countRes.json();
-    var totalUsers = (countData && countData[0]) ? parseInt(countData[0].value) : 0;
+    // 4. Get Counter (Current Position)
+    const countRes = await fetch(`${SB_URL}/rest/v1/counter?id=eq.total_users&select=value`, { headers });
+    const countData = await countRes.json();
+    const totalUsers = (countData && countData[0]) ? parseInt(countData[0].value) : 0;
 
-    var position = 1000 + totalUsers;
-    if (body.referred_by && body.referred_by !== 'direct') {
-      position = Math.max(1000, position - 5);
-    }
+    const position = 1000 + totalUsers;
+    const sessionToken = crypto.randomBytes(32).toString('hex');
 
-    var sessionToken = crypto.randomBytes(32).toString('hex');
-
-    var insertData = {
-      email:         body.email,
-      exam:          body.exam        || '',
-      ai_usage:      body.ai_usage    || '',
-      problem:       body.problem     || '',
-      position:      position,
-      total:         position + 500,
-      refs:          0,
-      moved_up:      0,
-      code:          body.code        || '',
-      referred_by:   body.referred_by || 'direct',
+    // 5. Insert New User
+    const insertData = {
+      email: email,
+      exam: body.exam || '',
+      ai_usage: body.ai_usage || '',
+      problem: body.problem || '',
+      position: position,
+      total: position + 500,
+      refs: 0,
+      moved_up: 0,
+      code: body.code || `user${Math.floor(Math.random() * 10000)}`,
+      referred_by: body.referred_by || 'direct',
       session_token: sessionToken
     };
 
-    var insert = await fetch(SB_URL + '/rest/v1/waitlist', {
+    const insert = await fetch(`${SB_URL}/rest/v1/waitlist`, {
       method: 'POST',
-      headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
+      headers: { ...headers, 'Prefer': 'return=minimal' },
       body: JSON.stringify(insertData)
     });
 
     if (insert.ok || insert.status === 201) {
-      await fetch(SB_URL + '/rest/v1/counter?id=eq.total_users', {
+      // 6. Increment Counter
+      await fetch(`${SB_URL}/rest/v1/counter?id=eq.total_users`, {
         method: 'PATCH',
-        headers: Object.assign({}, headers, { 'Prefer': 'return=minimal' }),
+        headers: { ...headers, 'Prefer': 'return=minimal' },
         body: JSON.stringify({ value: totalUsers + 1 })
       });
 
       return res.status(200).json({
-        status:        'success',
+        status: 'success',
         session_token: sessionToken,
-        position:      position,
-        total:         position + 500
+        position: position,
+        total: position + 500
       });
     } else {
-      var errText = await insert.text();
-      console.error('Insert error:', errText);
-      return res.status(200).json({ status: 'error', message: 'Insert failed' });
+      const errorMsg = await insert.text();
+      console.error("Supabase Insert Error:", errorMsg);
+      return res.status(500).json({ status: 'error', message: 'Database insert failed' });
     }
 
   } catch (err) {
-    console.error('Signup error:', err);
-    return res.status(200).json({ status: 'error', message: err.message });
+    console.error("Global Signup Handler Error:", err);
+    return res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 }
