@@ -1,17 +1,10 @@
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
-
 export default async function handler(req, res) {
+
   if (req.method !== 'POST') return res.status(405).end();
 
-  // handle both JSON and form-encoded body
-  var token = (req.body && req.body.token) || null;
+  var token = req.body.token;
 
   if (!token) {
-    console.log('No token received. Body:', JSON.stringify(req.body));
     return res.status(400).json({ success: false, error: 'No token' });
   }
 
@@ -36,13 +29,12 @@ export default async function handler(req, res) {
     );
 
     var data = await response.json();
-    console.log('Turnstile response:', JSON.stringify(data));
 
     if (data.success) {
       return res.status(200).json({ success: true });
     }
 
-    return res.status(403).json({ success: false, error: 'Captcha failed', details: data });
+    return res.status(403).json({ success: false, error: 'Captcha failed' });
 
   } catch (err) {
     console.error('Verify error:', err);
